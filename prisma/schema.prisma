@@ -30,19 +30,22 @@ model VerificationToken {
 
 
 model category {
-  category_id   Int       @id @default(autoincrement())
-  category_name String    @db.VarChar(255)
-  created_at    DateTime  @default(now())
-  updated_at    DateTime  @updatedAt
-  products      products[] @relation("ProductCategory")
+  category_id   Int            @id @default(autoincrement())
+  category_name String         @db.VarChar(255)
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
+  products      products[]     @relation("ProductCategory")
+  sub_categories sub_category[] @relation("CategoryToSubCategory")
 }
 
 model sub_category {
   sub_category_id    Int       @id @default(autoincrement())
   sub_category_title String    @db.VarChar(255)
+  category_id        Int
   created_at         DateTime  @default(now())
   updated_at         DateTime  @updatedAt
   products           products[] @relation("ProductSubCategory")
+  category           category  @relation("CategoryToSubCategory", fields: [category_id], references: [category_id])
 }
 
 model products {
