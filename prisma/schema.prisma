@@ -28,7 +28,6 @@ model VerificationToken {
   createdAt DateTime @default(now())
 }
 
-
 model category {
   category_id   Int            @id @default(autoincrement())
   category_name String         @db.VarChar(255)
@@ -41,11 +40,11 @@ model category {
 model sub_category {
   sub_category_id    Int       @id @default(autoincrement())
   sub_category_title String    @db.VarChar(255)
-  category_id        Int?       @default(0)
+  category_id        Int?      // Removed @default(0)
   created_at         DateTime  @default(now())
   updated_at         DateTime  @updatedAt
   products           products[] @relation("ProductSubCategory")
-  category           category  @relation("CategoryToSubCategory", fields: [category_id], references: [category_id])
+  category           category? @relation("CategoryToSubCategory", fields: [category_id], references: [category_id])
 }
 
 model products {
@@ -60,8 +59,8 @@ model products {
   cost_per_unit        Float?
   value                Float?      @default(0.0)
   min_order            Float?      @default(0.0)
-  category_id          Int?        @map("category") // Foreign key to category
-  sub_category_id      Int?        @map("sub_category") // Foreign key to sub_category
+  category_id          Int?        @map("category")
+  sub_category_id      Int?        @map("sub_category")
   remarks              String?     @db.Text
   default_tax_account  String?     @db.VarChar(50) @default("None")
   additional_cess      String?     @db.VarChar(50)
