@@ -41,7 +41,7 @@ model category {
 model sub_category {
   sub_category_id    Int       @id @default(autoincrement())
   sub_category_title String    @db.VarChar(255)
-  category_id        Int
+  category_id        Int?       @default(0)
   created_at         DateTime  @default(now())
   updated_at         DateTime  @updatedAt
   products           products[] @relation("ProductSubCategory")

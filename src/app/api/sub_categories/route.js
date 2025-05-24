@@ -1,11 +1,25 @@
 import prisma from '../../lib/prisma';
 import { NextResponse } from 'next/server';
 
-export async function GET() {
+export async function GET(request) {
   try {
     if (!prisma.sub_category) {
       console.error('Prisma sub_category model is undefined');
       return NextResponse.json({ error: 'Sub-category model not found' }, { status: 500 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (id) {
+      const subCategory = await prisma.sub_category.findUnique({
+        where: { sub_category_id: parseInt(id) },
+        include: { category: { select: { category_id, category_name } } },
+      });
+      if (!subCategory) {
+        return NextResponse.json({ error: 'Sub-category not found' }, { status: 404 });
+      }
+      return NextResponse.json(subCategory, { status: 200 });
     }
 
     const subCategories = await prisma.sub_category.findMany({
@@ -14,7 +28,7 @@ export async function GET() {
     });
     return NextResponse.json(subCategories, { status: 200 });
   } catch (error) {
-    console.error('Get sub-categories error:', error);
+    console.error('Get sub-categories error:', error.message, error.stack);
     return NextResponse.json({ error: 'Failed to fetch sub-categories' }, { status: 500 });
   }
 }
@@ -22,42 +36,20 @@ export async function GET() {
 export async function POST(request) {
   try {
     // Parse JSON
-    let data;
-    try {
-      data = await request.json();
-    } catch (parseError) {
-      console.error('JSON parsing error:', parseError);
-      return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 });
-    }
-
+  
+    const data = await request.json();
     const { sub_category_title, category_id } = data;
 
-    // Validate inputs
-    if (!sub_category_title || typeof sub_category_title !== 'string') {
-      return NextResponse.json({ error: 'Sub-category title is required and must be a string' }, { status: 400 });
-    }
-    if (!category_id || typeof category_id !== 'number') {
-      return NextResponse.json({ error: 'Category ID is required and must be a number' }, { status: 400 });
-    }
+   
 
-    // Check if category model exists
-    if (!prisma.category) {
-      console.error('Prisma category model is undefined');
-      return NextResponse.json({ error: 'Category model not found' }, { status: 500 });
-    }
+    // Check models
 
-    // Check if category_id exists
-    const category = await prisma.category.findUnique({
-      where: { category_id },
-    });
-    if (!category) {
-      return NextResponse.json({ error: 'Invalid category ID' }, { status: 400 });
-    }
-
+    // Check category_id
+   
     // Create sub-category
     const subCategory = await prisma.sub_category.create({
       data: {
-        sub_category_title: sub_category_title.trim(),
+        sub_category_title,
         category_id,
       },
     });
