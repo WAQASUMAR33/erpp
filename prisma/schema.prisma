@@ -17,6 +17,9 @@ model User {
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
   verificationTokens VerificationToken[]
+  invoices          Invoice[]         @relation("UserInvoices")
+  sales             Sale[]            @relation("UserSales")
+  expenses          Expense[]         @relation("UserExpenses")
 }
 
 model VerificationToken {
@@ -29,18 +32,18 @@ model VerificationToken {
 }
 
 model category {
-  category_id   Int            @id @default(autoincrement())
-  category_name String         @db.VarChar(255)
-  created_at    DateTime       @default(now())
-  updated_at    DateTime       @updatedAt
-  products      products[]     @relation("ProductCategory")
+  category_id    Int            @id @default(autoincrement())
+  category_name  String         @db.VarChar(255)
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @updatedAt
+  products       products[]     @relation("ProductCategory")
   sub_categories sub_category[] @relation("CategoryToSubCategory")
 }
 
 model sub_category {
   sub_category_id    Int       @id @default(autoincrement())
   sub_category_title String    @db.VarChar(255)
-  category_id        Int?      // Removed @default(0)
+  category_id        Int?
   created_at         DateTime  @default(now())
   updated_at         DateTime  @updatedAt
   products           products[] @relation("ProductSubCategory")
@@ -48,27 +51,235 @@ model sub_category {
 }
 
 model products {
-  id                   Int         @id @default(autoincrement())
-  item_name            String?     @db.VarChar(255)
-  item_code            String?     @db.VarChar(50)
-  barcode              String?     @db.VarChar(50)
-  uom                  Float?      @default(0.0)
-  item_desccription    String?     @db.Text
-  enable_batching      Int?        @default(0)
-  qunatity             Float?      @default(0.0)
+  id                   Int              @id @default(autoincrement())
+  item_name            String?          @db.VarChar(255)
+  item_code            String?          @db.VarChar(50)
+  barcode              String?          @db.VarChar(50)
+  uom_id               Int?             @map("uom")
+  item_description     String?          @db.Text
+  enable_batching      Int?             @default(0)
+  quantity             Float?           @default(0.0)
   cost_per_unit        Float?
-  value                Float?      @default(0.0)
-  min_order            Float?      @default(0.0)
-  category_id          Int?        @map("category")
-  sub_category_id      Int?        @map("sub_category")
-  remarks              String?     @db.Text
-  default_tax_account  String?     @db.VarChar(50) @default("None")
-  additional_cess      String?     @db.VarChar(50)
+  value                Float?           @default(0.0)
+  min_order            Float?           @default(0.0)
+  category_id          Int?             @map("category")
+  sub_category_id      Int?             @map("sub_category")
+  store_id             Int?             @map("store")
+  remarks              String?          @db.Text
+  default_tax_account  String?          @db.VarChar(50) @default("None")
+  additional_cess      String?          @db.VarChar(50)
   d_purchase_price_ex  Float?
   d_purchase_price_in  Float?
   d_sale_price_in      Float?
   d_sale_price_ex      Float?
   default_discount     Float?
-  category             category?   @relation("ProductCategory", fields: [category_id], references: [category_id])
-  sub_category         sub_category? @relation("ProductSubCategory", fields: [sub_category_id], references: [sub_category_id])
+  category             category?        @relation("ProductCategory", fields: [category_id], references: [category_id])
+  sub_category         sub_category?    @relation("ProductSubCategory", fields: [sub_category_id], references: [sub_category_id])
+  store                Store?           @relation("StoreProducts", fields: [store_id], references: [id])
+  uom                  UnitOfMeasurement? @relation("ProductUOM", fields: [uom_id], references: [id])
+  suppliers            SupplierProduct[] @relation("ProductSuppliers")
+  invoice_items        InvoiceItem[]    @relation("ProductInvoiceItems")
+  sale_items           SaleItem[]       @relation("ProductSaleItems")
+}
+
+model Supplier {
+  id                Int              @id @default(autoincrement())
+  supplier_name     String           @db.VarChar(255)
+  contact_name      String?          @db.VarChar(255)
+  email             String?          @unique @db.VarChar(255)
+  phone             String?          @db.VarChar(50)
+  address           String?          @db.Text
+  tax_id            String?          @db.VarChar(50)
+  payment_terms     String?          @db.VarChar(50) @default("Net 30")
+  status            String           @db.VarChar(20) @default("Active")
+  created_at        DateTime         @default(now())
+  updated_at        DateTime         @updatedAt
+  products          SupplierProduct[] @relation("SupplierProducts")
+  ledger_entries    SupplierLedger[] @relation("SupplierLedgerEntries")
+}
+
+model SupplierProduct {
+  supplier_id Int
+  product_id  Int
+  supplier    Supplier @relation("SupplierProducts", fields: [supplier_id], references: [id], onDelete: Cascade)
+  product     products @relation("ProductSuppliers", fields: [product_id], references: [id], onDelete: Cascade)
+  created_at  DateTime @default(now())
+  @@id([supplier_id, product_id])
+}
+
+model Customer {
+  id            Int             @id @default(autoincrement())
+  name          String          @db.VarChar(255)
+  email         String?         @unique @db.VarChar(255)
+  phone         String?         @db.VarChar(50)
+  address       String?         @db.Text
+  created_at    DateTime        @default(now())
+  updated_at    DateTime        @updatedAt
+  invoices      Invoice[]       @relation("CustomerInvoices")
+  sales         Sale[]          @relation("CustomerSales")
+  ledger_entries CustomerLedger[] @relation("CustomerLedgerEntries")
+}
+
+model Invoice {
+  id                Int          @id @default(autoincrement())
+  invoice_number    String       @unique @db.VarChar(50)
+  user_id           Int
+  customer_id       Int?
+  store_id          Int?
+  total_amount      Float        @default(0.0)
+  payment_status    String       @db.VarChar(20) @default("Pending")
+  invoice_date      DateTime     @default(now())
+  created_at        DateTime     @default(now())
+  updated_at        DateTime     @updatedAt
+  user              User         @relation("UserInvoices", fields: [user_id], references: [id])
+  customer          Customer?    @relation("CustomerInvoices", fields: [customer_id], references: [id])
+  store             Store?       @relation("StoreInvoices", fields: [store_id], references: [id])
+  invoice_items     InvoiceItem[] @relation("InvoiceItems")
+  customer_ledger_entries CustomerLedger[] @relation("InvoiceCustomerLedger")
+  supplier_ledger_entries SupplierLedger[] @relation("InvoiceSupplierLedger")
+}
+
+model InvoiceItem {
+  id                Int          @id @default(autoincrement())
+  invoice_id        Int
+  product_id        Int
+  tax_setting_id    Int?
+  quantity          Float
+  unit_price        Float
+  discount          Float?       @default(0.0)
+  tax_amount        Float?       @default(0.0)
+  total             Float
+  created_at        DateTime     @default(now())
+  updated_at        DateTime     @updatedAt
+  invoice           Invoice      @relation("InvoiceItems", fields: [invoice_id], references: [id], onDelete: Cascade)
+  product           products     @relation("ProductInvoiceItems", fields: [product_id], references: [id])
+  tax_setting       TaxSetting?  @relation("TaxSettingInvoiceItems", fields: [tax_setting_id], references: [id])
+}
+
+model Store {
+  id            Int       @id @default(autoincrement())
+  branch_title  String    @db.VarChar(255)
+  address       String?   @db.Text
+  phone         String?   @db.VarChar(50)
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  products      products[] @relation("StoreProducts")
+  invoices      Invoice[] @relation("StoreInvoices")
+  sales         Sale[]    @relation("StoreSales")
+  expenses      Expense[] @relation("StoreExpenses")
+}
+
+model TaxSetting {
+  id            Int           @id @default(autoincrement())
+  tax_name      String        @db.VarChar(255)
+  tax_per       Float
+  created_at    DateTime      @default(now())
+  updated_at    DateTime      @updatedAt
+  invoice_items InvoiceItem[] @relation("TaxSettingInvoiceItems")
+  sale_items    SaleItem[]    @relation("TaxSettingSaleItems")
+}
+
+model UnitOfMeasurement {
+  id            Int       @id @default(autoincrement())
+  uom_title     String    @db.VarChar(255)
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  products      products[] @relation("ProductUOM")
+}
+
+model Sale {
+  id                Int          @id @default(autoincrement())
+  sale_number       String       @unique @db.VarChar(50)
+  user_id           Int
+  customer_id       Int?
+  store_id          Int?
+  total_amount      Float        @default(0.0)
+  payment_status    String       @db.VarChar(20) @default("Pending")
+  sale_date         DateTime     @default(now())
+  created_at        DateTime     @default(now())
+  updated_at        DateTime     @updatedAt
+  user              User         @relation("UserSales", fields: [user_id], references: [id])
+  customer          Customer?    @relation("CustomerSales", fields: [customer_id], references: [id])
+  store             Store?       @relation("StoreSales", fields: [store_id], references: [id])
+  sale_items        SaleItem[]   @relation("SaleItems")
+  customer_ledger_entries CustomerLedger[] @relation("SaleCustomerLedger")
+}
+
+model SaleItem {
+  id                Int          @id @default(autoincrement())
+  sale_id           Int
+  product_id        Int
+  tax_setting_id    Int?
+  quantity          Float
+  unit_price        Float
+  discount          Float?       @default(0.0)
+  tax_amount        Float?       @default(0.0)
+  total             Float
+  created_at        DateTime     @default(now())
+  updated_at        DateTime     @updatedAt
+  sale              Sale         @relation("SaleItems", fields: [sale_id], references: [id], onDelete: Cascade)
+  product           products     @relation("ProductSaleItems", fields: [product_id], references: [id])
+  tax_setting       TaxSetting?  @relation("TaxSettingSaleItems", fields: [tax_setting_id], references: [id])
+}
+
+model ExpenseCategory {
+  id            Int       @id @default(autoincrement())
+  category_name String    @db.VarChar(255)
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  expenses      Expense[] @relation("ExpenseCategoryExpenses")
+}
+
+model Expense {
+  id                Int            @id @default(autoincrement())
+  expense_number    String         @unique @db.VarChar(50)
+  user_id           Int
+  store_id          Int?
+  category_id       Int?
+  amount            Float
+  payment_status    String         @db.VarChar(20) @default("Pending")
+  expense_date      DateTime       @default(now())
+  description       String?        @db.Text
+  created_at        DateTime       @default(now())
+  updated_at        DateTime       @updatedAt
+  user              User           @relation("UserExpenses", fields: [user_id], references: [id])
+  store             Store?         @relation("StoreExpenses", fields: [store_id], references: [id])
+  category          ExpenseCategory? @relation("ExpenseCategoryExpenses", fields: [category_id], references: [id])
+  supplier_ledger_entries SupplierLedger[] @relation("ExpenseSupplierLedger")
+}
+
+model CustomerLedger {
+  id                Int          @id @default(autoincrement())
+  ledger_number     String       @unique @db.VarChar(50)
+  customer_id       Int
+  transaction_type  String       @db.VarChar(50)
+  amount            Float
+  balance           Float
+  transaction_date  DateTime     @default(now())
+  reference_id      Int?
+  reference_type    String?      @db.VarChar(50)
+  description       String?      @db.Text
+  created_at        DateTime     @default(now())
+  updated_at        DateTime     @updatedAt
+  customer          Customer     @relation("CustomerLedgerEntries", fields: [customer_id], references: [id])
+  sale              Sale?        @relation("SaleCustomerLedger", fields: [reference_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "customer_ledger_sale_fkey")
+  invoice           Invoice?     @relation("InvoiceCustomerLedger", fields: [reference_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "customer_ledger_invoice_fkey")
+}
+
+model SupplierLedger {
+  id                Int          @id @default(autoincrement())
+  ledger_number     String       @unique @db.VarChar(50)
+  supplier_id       Int
+  transaction_type  String       @db.VarChar(50)
+  amount            Float
+  balance           Float
+  transaction_date  DateTime     @default(now())
+  reference_id      Int?
+  reference_type    String?      @db.VarChar(50)
+  description       String?      @db.Text
+  created_at        DateTime     @default(now())
+  updated_at        DateTime     @updatedAt
+  supplier          Supplier     @relation("SupplierLedgerEntries", fields: [supplier_id], references: [id])
+  expense           Expense?     @relation("ExpenseSupplierLedger", fields: [reference_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "supplier_ledger_expense_fkey")
+  invoice           Invoice?     @relation("InvoiceSupplierLedger", fields: [reference_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "supplier_ledger_invoice_fkey")
 }
