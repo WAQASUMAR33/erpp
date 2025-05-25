@@ -113,6 +113,7 @@ model Customer {
   email         String?         @unique @db.VarChar(255)
   phone         String?         @db.VarChar(50)
   address       String?         @db.Text
+  balance       Float           @default(0.0)
   created_at    DateTime        @default(now())
   updated_at    DateTime        @updatedAt
   invoices      Invoice[]       @relation("CustomerInvoices")
