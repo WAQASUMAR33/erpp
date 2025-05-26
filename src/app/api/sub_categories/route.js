@@ -1,35 +1,19 @@
 import prisma from '../../lib/prisma';
 import { NextResponse } from 'next/server';
 
-export async function GET(request) {
+export async function GET() {
   try {
     if (!prisma.sub_category) {
-      console.error('Prisma sub_category model is undefined');
-      return NextResponse.json({ error: 'Sub-category model not found' }, { status: 500 });
+      console.error('Prisma category model is undefined');
+      return NextResponse.json({ error: 'Category model not found' }, { status: 500 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
+    const categories = await prisma.sub_category.findMany();
 
-    if (id) {
-      const subCategory = await prisma.sub_category.findUnique({
-        where: { sub_category_id: parseInt(id) },
-        include: { category: { select: { category_id, category_name } } },
-      });
-      if (!subCategory) {
-        return NextResponse.json({ error: 'Sub-category not found' }, { status: 404 });
-      }
-      return NextResponse.json(subCategory, { status: 200 });
-    }
-
-    const subCategories = await prisma.sub_category.findMany({
-      orderBy: { sub_category_title: 'asc' },
-      include: { category: { select: { category_id, category_name } } },
-    });
-    return NextResponse.json(subCategories, { status: 200 });
+    return NextResponse.json(categories, { status: 200 });
   } catch (error) {
-    console.error('Get sub-categories error:', error.message, error.stack);
-    return NextResponse.json({ error: 'Failed to fetch sub-categories' }, { status: 500 });
+    console.error('Get categories error:', error);
+    return NextResponse.json({ error: 'Failed to fetch categories' }, { status: 500 });
   }
 }
 
