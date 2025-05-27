@@ -8,18 +8,59 @@ datasource db {
 }
 
 model User {
-  id                Int               @id @default(autoincrement())
-  email             String            @unique
-  password          String
-  name              String?
-  role              String            @default("USER")
-  isVerified        Boolean           @default(false)
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
-  verificationTokens VerificationToken[]
-  invoices          Invoice[]         @relation("UserInvoices")
-  sales             Sale[]            @relation("UserSales")
-  expenses          Expense[]         @relation("UserExpenses")
+  id            Int         @id @default(autoincrement())
+  username      String      @unique @db.VarChar(50)
+  email         String      @unique @db.VarChar(255)
+  password_hash String      @db.VarChar(255)
+  first_name    String?     @db.VarChar(50)
+  last_name     String?     @db.VarChar(50)
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @updatedAt
+  is_active     Boolean     @default(true)
+  user_roles    UserRole[]  @relation("UserRoles")
+  invoices      Invoice[]   @relation("UserInvoices")
+  sales         Sale[]      @relation("UserSales")
+  expenses      Expense[]   @relation("UserExpenses")
+  verification_tokens VerificationToken[]
+}
+
+model Role {
+  id            Int             @id @default(autoincrement())
+  role_name     String          @unique @db.VarChar(50)
+  description   String?         @db.Text
+  created_at    DateTime        @default(now())
+  updated_at    DateTime        @updatedAt
+  user_roles    UserRole[]      @relation("RoleUsers")
+  role_permissions RolePermission[] @relation("RolePermissions")
+}
+
+model UserRole {
+  id            Int         @id @default(autoincrement())
+  user_id       Int
+  role_id       Int
+  assigned_at   DateTime    @default(now())
+  user          User        @relation("UserRoles", fields: [user_id], references: [id], onDelete: Cascade)
+  role          Role        @relation("RoleUsers", fields: [role_id], references: [id], onDelete: Cascade)
+  @@unique([user_id, role_id])
+}
+
+model Permission {
+  id            Int             @id @default(autoincrement())
+  permission_name String        @unique @db.VarChar(50)
+  description   String?         @db.Text
+  created_at    DateTime        @default(now())
+  updated_at    DateTime        @updatedAt
+  role_permissions RolePermission[] @relation("PermissionRoles")
+}
+
+model RolePermission {
+  id            Int         @id @default(autoincrement())
+  role_id       Int
+  permission_id Int
+  assigned_at   DateTime    @default(now())
+  role          Role        @relation("RolePermissions", fields: [role_id], references: [id], onDelete: Cascade)
+  permission    Permission  @relation("PermissionRoles", fields: [permission_id], references: [id], onDelete: Cascade)
+  @@unique([role_id, permission_id])
 }
 
 model VerificationToken {
