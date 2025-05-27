@@ -1,36 +1,15 @@
 import prisma from '../../lib/prisma';
 import { NextResponse } from 'next/server';
 
-export async function GET(request) {
+export async function GET() {
   try {
-    if (!prisma.products) {
-      console.error('Prisma products model is undefined');
-      return NextResponse.json({ error: 'Products model not found' }, { status: 500 });
-    }
-
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-
-    if (id) {
-      const product = await prisma.products.findUnique({
-        where: { id: parseInt(id) },
-        include: {
-          category: { select: { category_id: true, category_name: true } },
-          sub_category: { select: { sub_category_id: true, sub_category_title: true } },
-        },
-      });
-      if (!product) {
-        return NextResponse.json({ error: 'Product not found' }, { status: 404 });
-      }
-      return NextResponse.json(product, { status: 200 });
-    }
-
+   
     const products = await prisma.products.findMany({
       orderBy: { item_name: 'asc' },
-      include: {
-        category: { select: { category_id: true, category_name: true } },
-        sub_category: { select: { sub_category_id: true, sub_category_title: true } },
-      },
+      // include: {
+      //   category: { select: { category_id: true, category_name: true } },
+      //   sub_category: { select: { sub_category_id: true, sub_category_title: true } },
+      // },
     });
     return NextResponse.json(products, { status: 200 });
   } catch (error) {
