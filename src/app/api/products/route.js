@@ -64,7 +64,7 @@ export async function POST(request) {
         barcode: barcode ? barcode.trim() : null,
         uom_id,
         item_description: item_description || null,
-        enable_batching: enable_batching ?? 0,
+        enable_batching: parseInt(enable_batching)  ?? 0,
         quantity: quantity ?? 0.0,
         cost_per_unit: cost_per_unit ?? null,
         value: value ?? 0.0,
