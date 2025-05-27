@@ -55,7 +55,7 @@ model products {
   item_name            String?          @db.VarChar(255)
   item_code            String?          @db.VarChar(50)
   barcode              String?          @db.VarChar(50)
-  uom_id               Int?             @map("uom")
+  uom_id               String?          @db.VarChar(255)
   item_description     String?          @db.Text
   enable_batching      Int?             @default(0)
   quantity             Float?           @default(0.0)
@@ -76,7 +76,6 @@ model products {
   category             category?        @relation("ProductCategory", fields: [category_id], references: [category_id])
   sub_category         sub_category?    @relation("ProductSubCategory", fields: [sub_category_id], references: [sub_category_id])
   store                Store?           @relation("StoreProducts", fields: [store_id], references: [id])
-  uom                  UnitOfMeasurement? @relation("ProductUOM", fields: [uom_id], references: [id])
   suppliers            SupplierProduct[] @relation("ProductSuppliers")
   invoice_items        InvoiceItem[]    @relation("ProductInvoiceItems")
   sale_items           SaleItem[]       @relation("ProductSaleItems")
@@ -185,7 +184,6 @@ model UnitOfMeasurement {
   uom_title     String    @db.VarChar(255)
   created_at    DateTime  @default(now())
   updated_at    DateTime  @updatedAt
-  products      products[] @relation("ProductUOM")
 }
 
 model Sale {
