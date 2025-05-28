@@ -18,11 +18,7 @@ export async function GET(request) {
       }
 
       const supplier = await prisma.supplier.findUnique({
-        where: { id: supplierId },
-        include: {
-          products: { select: { product_id: true } },
-          ledger_entries: { select: { id: true } },
-        },
+        where: { id: supplierId }
       });
 
       if (!supplier) {
@@ -33,11 +29,8 @@ export async function GET(request) {
     }
 
     const suppliers = await prisma.supplier.findMany({
-      orderBy: { supplier_name: 'asc' },
-      include: {
-        products: { select: { product_id: true } },
-        ledger_entries: { select: { id: true } },
-      },
+      orderBy: { supplier_name: 'asc' }
+      
     });
 
     return NextResponse.json(suppliers, { status: 200 });
@@ -132,7 +125,7 @@ export async function POST(request) {
         address: address || null,
         bank_name: bank_name ? bank_name.trim() : null,
         bank_accountno: bank_accountno ? bank_accountno.trim() : null,
-        balance: balance !== undefined ? balance : 0.0,
+        balance: parseFloat(balance)  !== undefined ? parseFloat(balance)  : 0.0,
         tax_id: tax_id ? tax_id.trim() : null,
         payment_terms: payment_terms ? payment_terms.trim() : 'Net 30',
         status: status || 'Active',

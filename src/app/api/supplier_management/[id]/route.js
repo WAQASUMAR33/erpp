@@ -134,7 +134,7 @@ export async function PUT(request, { params }) {
         address: address !== undefined ? address : existingSupplier.address,
         bank_name: bank_name !== undefined ? bank_name : existingSupplier.bank_name,
         bank_accountno: bank_accountno !== undefined ? bank_accountno : existingSupplier.bank_accountno,
-        balance: balance !== undefined ? balance : existingSupplier.balance,
+        balance: parseFloat(balance)  !== undefined ? parseFloat(balance)  : existingSupplier.balance,
         tax_id: tax_id !== undefined ? tax_id : existingSupplier.tax_id,
         payment_terms: payment_terms !== undefined ? payment_terms : existingSupplier.payment_terms,
         status: status !== undefined ? status : existingSupplier.status,
