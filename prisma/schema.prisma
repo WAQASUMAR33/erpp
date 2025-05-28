@@ -129,6 +129,9 @@ model Supplier {
   email             String?          @unique @db.VarChar(255)
   phone             String?          @db.VarChar(50)
   address           String?          @db.Text
+  bank_name         String?          @db.VarChar(50)
+  bank_accountno    String?          @db.VarChar(50)
+  balance           Float?           @default(0.0)
   tax_id            String?          @db.VarChar(50)
   payment_terms     String?          @db.VarChar(50) @default("Net 30")
   status            String           @db.VarChar(20) @default("Active")
