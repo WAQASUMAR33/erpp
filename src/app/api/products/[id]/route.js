@@ -1,6 +1,36 @@
 import prisma from '../../../lib/prisma';
 import { NextResponse } from 'next/server';
 
+
+
+export async function GET(request, { params }) {
+  try {
+    const { id } = params;
+
+    if (!id || isNaN(parseInt(id))) {
+      return NextResponse.json({ error: 'Valid expense ID is required' }, { status: 400 });
+    }
+
+  
+
+    const productss = await prisma.products.findUnique({
+      where: { id: parseInt(id) }
+    });
+
+    if (!productss) {
+      return NextResponse.json({ error: 'Expense not found' }, { status: 404 });
+    }
+
+    return NextResponse.json(productss, { status: 200 });
+  } catch (error) {
+    console.error('Get expense error:', error);
+    return NextResponse.json({ error: 'Failed to fetch expense' }, { status: 500 });
+  }
+}
+
+
+
+
 export async function PUT(request, { params }) {
   try {
     const id = parseInt(params.id);

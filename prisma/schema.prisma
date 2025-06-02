@@ -236,7 +236,12 @@ model Sale {
   user_id           Int
   customer_id       Int?
   store_id          Int?
+  invoice_no        String?      @default("")
+  due_date          DateTime     @updatedAt
   total_amount      Float        @default(0.0)
+  discount_amount   Float        @default(0.0)
+  total_tax         Float        @default(0.0)
+  net_total         Float        @default(0.0)
   payment_status    String       @db.VarChar(20) @default("Pending")
   sale_date         DateTime     @default(now())
   created_at        DateTime     @default(now())
