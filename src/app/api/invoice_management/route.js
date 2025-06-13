@@ -57,6 +57,9 @@ export async function POST(request) {
     } = data;
 
     // Validate Invoice required fields
+     // Validate Invoice required fields
+      // Validate Invoice required fields
+       // Validate Invoice required fields
     if (!store_id || !Number.isInteger(store_id)) {
       return NextResponse.json({ error: 'Valid store_id is required' }, { status: 400 });
     }
