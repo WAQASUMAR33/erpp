@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 export async function GET(request, { params }) {
   try {
     const { id } = params;
-    const subcategories = await prisma.sub_category.findMany({
+    const subcategories = await prisma.SubCategory.findMany({
       where: { category_id: parseInt(id) },
     });
 

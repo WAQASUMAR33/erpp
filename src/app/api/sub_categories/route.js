@@ -3,12 +3,12 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    if (!prisma.sub_category) {
+    if (!prisma.SubCategory) {
       console.error('Prisma category model is undefined');
       return NextResponse.json({ error: 'Category model not found' }, { status: 500 });
     }
 
-    const categories = await prisma.sub_category.findMany();
+    const categories = await prisma.SubCategory.findMany();
 
     return NextResponse.json(categories, { status: 200 });
   } catch (error) {
@@ -31,7 +31,7 @@ export async function POST(request) {
     // Check category_id
    
     // Create sub-category
-    const subCategory = await prisma.sub_category.create({
+    const subCategory = await prisma.SubCategory.create({
       data: {
         sub_category_title,
         category_id,

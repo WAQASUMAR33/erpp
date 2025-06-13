@@ -31,7 +31,7 @@ export async function PUT(request, { params }) {
     }
 
     // Check models
-    if (!prisma.sub_category) {
+    if (!prisma.SubCategory) {
       console.error('Prisma sub_category model is undefined');
       return NextResponse.json({ error: 'Sub-category model not found' }, { status: 500 });
     }
@@ -41,7 +41,7 @@ export async function PUT(request, { params }) {
     }
 
     // Check sub-category exists
-    const existingSubCategory = await prisma.sub_category.findUnique({
+    const existingSubCategory = await prisma.SubCategory.findUnique({
       where: { sub_category_id: id },
     });
     if (!existingSubCategory) {
@@ -59,7 +59,7 @@ export async function PUT(request, { params }) {
     }
 
     // Update sub-category
-    const subCategory = await prisma.sub_category.update({
+    const subCategory = await prisma.SubCategory.update({
       where: { sub_category_id: id },
       data: {
         sub_category_title: sub_category_title ? sub_category_title.trim() : undefined,
@@ -85,13 +85,13 @@ export async function DELETE(request, { params }) {
     }
 
     // Check model
-    if (!prisma.sub_category) {
+    if (!prisma.SubCategory) {
       console.error('Prisma sub_category model is undefined');
       return NextResponse.json({ error: 'Sub-category model not found' }, { status: 500 });
     }
 
     // Check sub-category exists
-    const existingSubCategory = await prisma.sub_category.findUnique({
+    const existingSubCategory = await prisma.SubCategory.findUnique({
       where: { sub_category_id: id },
     });
     if (!existingSubCategory) {
@@ -99,7 +99,7 @@ export async function DELETE(request, { params }) {
     }
 
     // Delete sub-category
-    await prisma.sub_category.delete({
+    await prisma.SubCategory.delete({
       where: { sub_category_id: id },
     });
 

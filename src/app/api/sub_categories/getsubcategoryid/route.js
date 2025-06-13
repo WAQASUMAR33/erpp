@@ -13,7 +13,7 @@ export async function POST(request) {
    
 
     // Check for existing category (case-insensitive)
-    let subcategory_id = await prisma.sub_category.findFirst({
+    let subcategory_id = await prisma.SubCategory.findFirst({
       where: {
         sub_category_title: {
           equals: sub_category_title.trim()

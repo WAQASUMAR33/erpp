@@ -13,7 +13,7 @@ export async function GET(request, { params }) {
 
   
 
-    const productss = await prisma.products.findUnique({
+    const productss = await prisma.Product.findUnique({
       where: { id: parseInt(id) }
     });
 
@@ -63,13 +63,13 @@ export async function PUT(request, { params }) {
     }
 
     // Check model
-    if (!prisma.products) {
+    if (!prisma.Product) {
       console.error('Prisma products model is undefined');
       return NextResponse.json({ error: 'Products model not found' }, { status: 500 });
     }
 
     // Check product exists
-    const existingProduct = await prisma.products.findUnique({ where: { id } });
+    const existingProduct = await prisma.Product.findUnique({ where: { id } });
     if (!existingProduct) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
@@ -148,18 +148,18 @@ export async function PUT(request, { params }) {
       }
     }
     if (sub_category_id) {
-      if (!prisma.sub_category) {
+      if (!prisma.SubCategory) {
         console.error('Prisma sub_category model is undefined');
         return NextResponse.json({ error: 'Sub-category model not found' }, { status: 500 });
       }
-      const subCategory = await prisma.sub_category.findUnique({ where: { sub_category_id } });
+      const subCategory = await prisma.SubCategory.findUnique({ where: { sub_category_id } });
       if (!subCategory) {
         return NextResponse.json({ error: 'Invalid sub-category ID' }, { status: 400 });
       }
     }
 
     // Update product
-    const product = await prisma.products.update({
+    const product = await prisma.Product.update({
       where: { id },
       data: {
         item_name,
@@ -203,19 +203,19 @@ export async function DELETE(request, { params }) {
     }
 
     // Check model
-    if (!prisma.products) {
+    if (!prisma.Product) {
       console.error('Prisma products model is undefined');
       return NextResponse.json({ error: 'Products model not found' }, { status: 500 });
     }
 
     // Check product exists
-    const existingProduct = await prisma.products.findUnique({ where: { id } });
+    const existingProduct = await prisma.Product.findUnique({ where: { id } });
     if (!existingProduct) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
     // Delete product
-    await prisma.products.delete({ where: { id } });
+    await prisma.Product.delete({ where: { id } });
 
     return NextResponse.json({ message: 'Product deleted successfully' }, { status: 200 });
   } catch (error) {
