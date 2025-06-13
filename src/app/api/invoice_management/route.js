@@ -296,7 +296,7 @@ export async function POST(request) {
               unit_price: parseFloat(item.unit_price),
               quantity: parseFloat(item.quantity),
               total_amount: parseFloat(item.total_amount),
-              tax_setting_id: item.tax_setting_id ? parseInt(item.tax_setting_id) : null,
+              tax_setting_id:parseInt( item.tax_setting_id )? parseInt(item.tax_setting_id) : 0,
               tax_amount: parseFloat(item.tax_amount),
               discount_per: parseFloat(item.discount_per),
               discount_amount: parseFloat(item.discount_amount),
