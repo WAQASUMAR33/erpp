@@ -248,15 +248,7 @@ export async function POST(request) {
           { status: 400 }
         );
       }
-      if (
-        tax_setting_id &&
-        !(await prisma.taxSetting.findUnique({ where: { id: parseInt(tax_setting_id) } }))
-      ) {
-        return NextResponse.json(
-          { error: 'Invalid tax_setting_id: ${tax_setting_id}' },
-          { status: 400 }
-        );
-      }
+  
     }
 
     // Create Invoice and InvoiceItems in a transaction
