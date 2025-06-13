@@ -57,14 +57,11 @@ export async function POST(request) {
     } = data;
 
     // Validate Invoice required fields
-     // Validate Invoice required fields
-      // Validate Invoice required fields
-       // Validate Invoice required fields
-    if (!store_id || !Number.isInteger(store_id)) {
-      return NextResponse.json({ error: 'Valid store_id is required' }, { status: 400 });
+    if (!store_id || isNaN(parseInt(store_id))) {
+      return NextResponse.json({ error: 'Valid store_id (integer) is required' }, { status: 400 });
     }
-    if (!supplier_id || !Number.isInteger(supplier_id)) {
-      return NextResponse.json({ error: 'Valid supplier_id is required' }, { status: 400 });
+    if (!supplier_id || isNaN(parseInt(supplier_id))) {
+      return NextResponse.json({ error: 'Valid supplier_id (integer) is required' }, { status: 400 });
     }
     if (!invoice_id || typeof invoice_id !== 'string' || invoice_id.length > 50) {
       return NextResponse.json(
@@ -72,38 +69,41 @@ export async function POST(request) {
         { status: 400 }
       );
     }
-    if (!Number.isFinite(total_amount) || total_amount < 0) {
+    if (!Number.isFinite(parseFloat(total_amount)) || parseFloat(total_amount) < 0) {
       return NextResponse.json(
         { error: 'Valid total_amount (non-negative number) is required' },
         { status: 400 }
       );
     }
-    if (!Number.isFinite(tax_amount) || tax_amount < 0) {
+    if (!Number.isFinite(parseFloat(tax_amount)) || parseFloat(tax_amount) < 0) {
       return NextResponse.json(
         { error: 'Valid tax_amount (non-negative number) is required' },
         { status: 400 }
       );
     }
-    if (!Number.isFinite(net_total) || net_total < 0) {
+    if (!Number.isFinite(parseFloat(net_total)) || parseFloat(net_total) < 0) {
       return NextResponse.json(
         { error: 'Valid net_total (non-negative number) is required' },
         { status: 400 }
       );
     }
-    if (!Number.isFinite(pre_balance)) {
+    if (!Number.isFinite(parseFloat(pre_balance))) {
       return NextResponse.json(
-        { error: 'Valid pre_balance is required' },
+        { error: 'Valid pre_balance (number) is required' },
         { status: 400 }
       );
     }
-    if (!Number.isFinite(payment) || payment < 0) {
+    if (!Number.isFinite(parseFloat(payment)) || parseFloat(payment) < 0) {
       return NextResponse.json(
         { error: 'Valid payment (non-negative number) is required' },
         { status: 400 }
       );
     }
-    if (!Number.isFinite(balance)) {
-      return NextResponse.json({ error: 'Valid balance is required' }, { status: 400 });
+    if (!Number.isFinite(parseFloat(balance))) {
+      return NextResponse.json(
+        { error: 'Valid balance (number) is required' },
+        { status: 400 }
+      );
     }
     if (!paymode || typeof paymode !== 'string') {
       return NextResponse.json(
@@ -131,8 +131,8 @@ export async function POST(request) {
     }
 
     // Validate optional fields
-    if (user_id && !Number.isInteger(user_id)) {
-      return NextResponse.json({ error: 'Invalid user_id' }, { status: 400 });
+    if (user_id && isNaN(parseInt(user_id))) {
+      return NextResponse.json({ error: 'Invalid user_id (integer)' }, { status: 400 });
     }
 
     // Validate invoice_items array
@@ -144,13 +144,13 @@ export async function POST(request) {
     }
 
     // Validate foreign keys for Invoice
-    if (!(await prisma.store.findUnique({ where: { id: store_id } }))) {
+    if (!(await prisma.store.findUnique({ where: { id: parseInt(store_id) } }))) {
       return NextResponse.json({ error: 'Invalid store_id' }, { status: 400 });
     }
-    if (!(await prisma.supplier.findUnique({ where: { id: supplier_id } }))) {
+    if (!(await prisma.supplier.findUnique({ where: { id: parseInt(supplier_id) } }))) {
       return NextResponse.json({ error: 'Invalid supplier_id' }, { status: 400 });
     }
-    if (user_id && !(await prisma.user.findUnique({ where: { id: user_id } }))) {
+    if (user_id && !(await prisma.user.findUnique({ where: { id: parseInt(user_id) } }))) {
       return NextResponse.json({ error: 'Invalid user_id' }, { status: 400 });
     }
     if (await prisma.invoice.findUnique({ where: { invoice_id } })) {
@@ -172,85 +172,88 @@ export async function POST(request) {
         supplier_id: item_supplier_id,
       } = item;
 
-      if (!product_id || !Number.isInteger(product_id)) {
+      if (!product_id || isNaN(parseInt(product_id))) {
         return NextResponse.json(
-          { error: 'Valid product_id is required for each invoice item' },
+          { error: 'Valid product_id (integer) is required for each invoice item' },
           { status: 400 }
         );
       }
-      if (!item_supplier_id || !Number.isInteger(item_supplier_id)) {
+      if (!item_supplier_id || isNaN(parseInt(item_supplier_id))) {
         return NextResponse.json(
-          { error: 'Valid supplier_id is required for each invoice item' },
+          { error: 'Valid supplier_id (integer) is required for each invoice item' },
           { status: 400 }
         );
       }
-      if (!Number.isFinite(unit_price) || unit_price < 0) {
+      if (!Number.isFinite(parseFloat(unit_price)) || parseFloat(unit_price) < 0) {
         return NextResponse.json(
           { error: 'Valid unit_price (non-negative number) is required for each invoice item' },
           { status: 400 }
         );
       }
-      if (!Number.isFinite(quantity) || quantity <= 0) {
+      if (!Number.isFinite(parseFloat(quantity)) || parseFloat(quantity) <= 0) {
         return NextResponse.json(
           { error: 'Valid quantity (positive number) is required for each invoice item' },
           { status: 400 }
         );
       }
-      if (!Number.isFinite(item_total_amount) || item_total_amount < 0) {
+      if (!Number.isFinite(parseFloat(item_total_amount)) || parseFloat(item_total_amount) < 0) {
         return NextResponse.json(
           { error: 'Valid total_amount (non-negative number) is required for each invoice item' },
           { status: 400 }
         );
       }
-      if (tax_setting_id && !Number.isInteger(tax_setting_id)) {
+      if (tax_setting_id && isNaN(parseInt(tax_setting_id))) {
         return NextResponse.json(
-          { error: 'Invalid tax_setting_id in invoice item' },
+          { error: 'Valid tax_setting_id (integer) is required for each invoice item' },
           { status: 400 }
         );
       }
-      if (!Number.isFinite(item_tax_amount) || item_tax_amount < 0) {
+      if (!Number.isFinite(parseFloat(item_tax_amount)) || parseFloat(item_tax_amount) < 0) {
         return NextResponse.json(
           { error: 'Valid tax_amount (non-negative number) is required for each invoice item' },
           { status: 400 }
         );
       }
-      if (!Number.isFinite(discount_per) || discount_per < 0) {
+      if (!Number.isFinite(parseFloat(discount_per)) || parseFloat(discount_per) < 0) {
         return NextResponse.json(
           { error: 'Valid discount_per (non-negative number) is required for each invoice item' },
           { status: 400 }
         );
       }
-      if (!Number.isFinite(item_discount_amount) || item_discount_amount < 0) {
+      if (
+        !Number.isFinite(parseFloat(item_discount_amount)) ||
+        parseFloat(item_discount_amount) < 0
+      ) {
         return NextResponse.json(
           { error: 'Valid discount_amount (non-negative number) is required for each invoice item' },
           { status: 400 }
         );
       }
-      if (!Number.isFinite(item_net_total) || item_net_total < 0) {
+      if (!Number.isFinite(parseFloat(item_net_total)) || parseFloat(item_net_total) < 0) {
         return NextResponse.json(
           { error: 'Valid net_total (non-negative number) is required for each invoice item' },
           { status: 400 }
         );
       }
 
-      if (!(await prisma.product.findUnique({ where: { id: product_id } }))) {
+      if (!(await prisma.product.findUnique({ where: { id: parseInt(product_id) } }))) {
         return NextResponse.json(
           { error: `Invalid product_id: ${product_id}` },
           { status: 400 }
         );
       }
-      if (!(await prisma.supplier.findUnique({ where: { id: item_supplier_id } }))) {
+      if (!(await prisma.supplier.findUnique({ where: { id: parseInt(item_supplier_id) } }))) {
         return NextResponse.json(
-          { error: `Invalid supplier_id: ${item_supplier_id} in invoice item` },
+          { error: "Invalid supplier_id: ${item_supplier_id} in invoice item" },
           { status: 400 }
         );
       }
       if (
         tax_setting_id &&
-        !(await prisma.taxSetting.findUnique({ where: { id: tax_setting_id } }))
+        !(await prisma.taxSetting.findUnique({ where: { id: parseInt(tax_setting_id) } }))
       ) {
         return NextResponse.json(
-          { error: `Invalid tax_setting_id: ${tax_setting_id}` },
+          { error: 'Invalid tax_setting_id: ${tax_setting_id}' },
           { status: 400 }
         );
       }
@@ -263,13 +266,13 @@ export async function POST(request) {
         data: {
           store_id: parseInt(store_id),
           supplier_id: parseInt(supplier_id),
-          user_id:parseInt(user_id),
-          total_amount :parseFloat(total_amount),
+          user_id: user_id ? parseInt(user_id) : null,
+          total_amount: parseFloat(total_amount),
           tax_amount: parseFloat(tax_amount),
           net_total: parseFloat(net_total),
-          pre_balance : parseFloat(pre_balance),
+          pre_balance: parseFloat(pre_balance),
           payment: parseFloat(payment),
-          balance : parseFloat(balance),
+          balance: parseFloat(balance),
           paymode,
           bank_name,
           bank_cardno,
@@ -289,11 +292,11 @@ export async function POST(request) {
           tx.invoiceItem.create({
             data: {
               invoice_id: invoice.id,
-              product_id: parseInt(item.product_id) ,
+              product_id: parseInt(item.product_id),
               unit_price: parseFloat(item.unit_price),
-              quantity: parseFloat( item.quantity),
+              quantity: parseFloat(item.quantity),
               total_amount: parseFloat(item.total_amount),
-              tax_setting_id: parseInt(item.tax_setting_id),
+              tax_setting_id: item.tax_setting_id ? parseInt(item.tax_setting_id) : null,
               tax_amount: parseFloat(item.tax_amount),
               discount_per: parseFloat(item.discount_per),
               discount_amount: parseFloat(item.discount_amount),
