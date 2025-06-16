@@ -184,3 +184,27 @@ export async function POST(request) {
     );
   }
 }
+
+
+
+export async function GET() {
+  try {
+    // Fetch all users
+    const users = await prisma.user.findMany();
+
+    // Return users
+    return NextResponse.json(users);
+  } catch (error) {
+    console.error('Get users error:', error.message, error.stack);
+    if (error.code === 'P1001') {
+      return NextResponse.json(
+        { error: 'Database connection failed' },
+        { status: 500 }
+      );
+    }
+    return NextResponse.json(
+      { error: 'Failed to retrieve users', details: error.message },
+      { status: 500 }
+    );
+  }
+}
