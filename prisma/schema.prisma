@@ -83,7 +83,7 @@ model RolePermission {
 model VerificationToken {
   id         Int      @id @default(autoincrement())
   token      String   @unique
-  user_id    String
+  user_id    Int
   user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_vtoken_user")
   expires_at DateTime
   created_at DateTime @default(now())
@@ -189,7 +189,7 @@ model Invoice {
   id                     Int               @id @default(autoincrement())
   store_id               Int
   supplier_id            Int
-  user_id                String?
+  user_id                Int?
   total_amount           Float
   tax_amount             Float
   net_total              Float
@@ -267,7 +267,7 @@ model UnitOfMeasurement {
 model Sale {
   id                     Int          @id @default(autoincrement())
   sale_number            String       @unique @db.VarChar(50)
-  user_id                String
+  user_id                Int
   customer_id            Int?
   store_id               Int?
   invoice_no             String?      @default("")
@@ -315,7 +315,7 @@ model ExpenseCategory {
 
 model Expense {
   id                     Int              @id @default(autoincrement())
-  user_id                String
+  user_id                Int
   store_id               Int?
   category_id            Int?
   amount                 Float
@@ -324,7 +324,7 @@ model Expense {
   description            String?          @db.Text
   created_at             DateTime         @default(now())
   updated_at             DateTime         @updatedAt
-  user                   User             @relation("UserExpenses", fields: [user_id], references: [id], map: "fk_expense_user")
+  user                   User      @relation("UserExpenses", fields: [user_id], references: [id])
   store                  Store?           @relation("StoreExpenses", fields: [store_id], references: [id], map: "fk_expense_store")
   category               ExpenseCategory? @relation("ExpenseCategoryExpenses", fields: [category_id], references: [id], map: "fk_expense_category")
   supplier_ledger_entries SupplierLedger[] @relation("ExpenseSupplierLedger")
