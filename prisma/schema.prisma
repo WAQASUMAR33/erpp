@@ -8,15 +8,34 @@ datasource db {
 }
 
 model User {
-  id                      Int                      @id @default(autoincrement())
+  id                      String                   @id @default(uuid())
   username                String                   @unique @db.VarChar(50)
-  email                   String                   @unique @db.VarChar(255)
-  password_hash           String                   @db.VarChar(255)
-  first_name              String?                  @db.VarChar(50)
-  last_name               String?                  @db.VarChar(50)
+  password                String                   @db.VarChar(255)
+  fullname                String                   @db.VarChar(100)
   created_at              DateTime                 @default(now())
   updated_at              DateTime                 @updatedAt
-  is_active               Boolean                  @default(true)
+  role                    String                   @db.VarChar(50)
+  route                   String?                  @db.VarChar(255)
+  status                  String                   @db.VarChar(50)
+  p_sales                 String                   @db.VarChar(50)
+  p_accounts              String                   @db.VarChar(50)
+  p_view_sales            String                   @db.VarChar(50)
+  p_purchases             String                   @db.VarChar(50)
+  p_view_purchases        String                   @db.VarChar(50)
+  p_sale_return           String                   @db.VarChar(50)
+  p_view_products         String                   @db.VarChar(50)
+  p_products_management   String                   @db.VarChar(50)
+  p_dayend                String                   @db.VarChar(50)
+  p_view_expences         String                   @db.VarChar(50)
+  p_customer_management   String                   @db.VarChar(50)
+  p_discounts             String                   @db.VarChar(50)
+  p_employee_management   String                   @db.VarChar(50)
+  p_printing              String                   @db.VarChar(50)
+  p_view_customers        String                   @db.VarChar(50)
+  p_users_management      String                   @db.VarChar(50)
+  p_supplier_management   String                   @db.VarChar(50)
+  terminal                String?                  @db.VarChar(50)
+  store_id                String                   @db.VarChar(50)
   invoices                Invoice[]                @relation("UserInvoices")
   sales                   Sale[]                   @relation("UserSales")
   expenses                Expense[]                @relation("UserExpenses")
@@ -64,7 +83,7 @@ model RolePermission {
 model VerificationToken {
   id         Int      @id @default(autoincrement())
   token      String   @unique
-  user_id    Int
+  user_id    String
   user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_vtoken_user")
   expires_at DateTime
   created_at DateTime @default(now())
@@ -170,7 +189,7 @@ model Invoice {
   id                     Int               @id @default(autoincrement())
   store_id               Int
   supplier_id            Int
-  user_id                Int?
+  user_id                String?
   total_amount           Float
   tax_amount             Float
   net_total              Float
@@ -248,7 +267,7 @@ model UnitOfMeasurement {
 model Sale {
   id                     Int          @id @default(autoincrement())
   sale_number            String       @unique @db.VarChar(50)
-  user_id                Int
+  user_id                String
   customer_id            Int?
   store_id               Int?
   invoice_no             String?      @default("")
@@ -296,7 +315,7 @@ model ExpenseCategory {
 
 model Expense {
   id                     Int              @id @default(autoincrement())
-  user_id                Int
+  user_id                String
   store_id               Int?
   category_id            Int?
   amount                 Float
