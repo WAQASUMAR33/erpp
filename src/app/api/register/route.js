@@ -228,3 +228,15 @@ export async function POST(request) {
     );
   }
 }
+
+
+
+export async function GET() {
+  try {
+    const users = await prisma.user.findMany();
+    return NextResponse.json(users);
+  } catch (error) {
+    console.error('Get users error:', error.message, error.stack);
+    return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
+  }
+}
