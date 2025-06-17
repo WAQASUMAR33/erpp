@@ -20,12 +20,12 @@ export async function POST(request) {
         },
       },
       select: {
-        sub_category_id: true,
+        id: true,
       },
     });
 
 
-    return NextResponse.json({ sub_category_id: subcategory_id.sub_category_id }, { status: 200 });
+    return NextResponse.json({ id: subcategory_id.id }, { status: 200 });
   } catch (error) {
     console.error('Category lookup/create error:', error);
     return NextResponse.json({ error: 'Failed to process category' }, { status: 500 });
