@@ -20,7 +20,7 @@ export async function POST(request) {
         },
       },
       select: {
-        category_id: true,
+        id: true,
       },
     });
 
