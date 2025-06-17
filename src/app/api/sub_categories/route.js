@@ -34,7 +34,7 @@ export async function POST(request) {
     const subCategory = await prisma.SubCategory.create({
       data: {
         sub_category_title,
-        category_id,
+        category_id : parent(category_id),
       },
     });
 
