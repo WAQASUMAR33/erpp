@@ -99,7 +99,7 @@ export async function POST(request) {
     }
 
     // Check if user is active
-    if (user.status !== 'Active') {
+    if (user.status !== 'active') {
       return NextResponse.json(
         { error: 'User account is not active' },
         { status: 403 }
