@@ -25,7 +25,7 @@ export async function POST(request) {
     });
 
 
-    return NextResponse.json({ category_id: category.category_id }, { status: 200 });
+    return NextResponse.json({ id: category.id }, { status: 200 });
   } catch (error) {
     console.error('Category lookup/create error:', error);
     return NextResponse.json({ error: 'Failed to process category' }, { status: 500 });
