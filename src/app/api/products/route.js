@@ -4,17 +4,121 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
+    // Check if Prisma is properly initialized
+    if (!prisma.product) {
+      console.error('Prisma Product model is undefined');
+      return NextResponse.json({ error: 'Product model not found' }, { status: 500 });
+    }
+
+    // Fetch products with related data in a flat structure
     const products = await prisma.product.findMany({
-      orderBy: { item_name: 'asc' },
-      // Uncomment if you need related data
-      // include: {
-      //   category: { select: { id: true, category_name: true } },
-      //   sub_category: { select: { id: true, sub_category_name: true } },
-      // },
+      select: {
+        id: true,
+        item_name: true,
+        item_code: true,
+        barcode: true,
+        quantity: true,
+        cost_per_unit: true,
+        value: true,
+        min_order: true,
+        purchase_price_ex: true,
+        purchase_price_in: true,
+        sale_price_in: true,
+        sale_price_ex: true,
+        b2b_rate: true,
+        default_discount: true,
+        remarks: true,
+        default_tax_account: true,
+        additional_cess: true,
+        // Category fields
+        category: {
+          select: {
+            category_name: true,
+          },
+        },
+        // SubCategory fields
+        sub_category: {
+          select: {
+            sub_category_title: true,
+          },
+        },
+        // Store fields
+        store: {
+          select: {
+            branch_title: true,
+            address: true,
+            phone: true,
+          },
+        },
+        // UnitOfMeasurement fields
+        uom: {
+          select: {
+            uom_title: true,
+          },
+        },
+        // Suppliers (select supplier names)
+        suppliers: {
+          select: {
+            supplier: {
+              select: {
+                supplier_name: true,
+              },
+            },
+          },
+        },
+        // InvoiceItems (aggregate total amount and quantity)
+        invoice_items: {
+          select: {
+            total_amount: true,
+            quantity: true,
+          },
+        },
+        // SaleItems (aggregate total amount and quantity)
+        sale_items: {
+          select: {
+            total: true,
+            quantity: true,
+          },
+        },
+      },
     });
-    return NextResponse.json(products, { status: 200 });
+
+    // Flatten the response
+    const flattenedProducts = products.map(product => ({
+      id: product.id,
+      item_name: product.item_name ?? 'N/A',
+      item_code: product.item_code ?? 'N/A',
+      barcode: product.barcode ?? 'N/A',
+      quantity: product.quantity,
+      cost_per_unit: product.cost_per_unit ?? 0,
+      value: product.value,
+      min_order: product.min_order,
+      purchase_price_ex: product.purchase_price_ex ?? 0,
+      purchase_price_in: product.purchase_price_in ?? 0,
+      sale_price_in: product.sale_price_in ?? 0,
+      sale_price_ex: product.sale_price_ex ?? 0,
+      b2b_rate: product.b2b_rate,
+      default_discount: product.default_discount ?? 0,
+      remarks: product.remarks ?? 'N/A',
+      default_tax_account: product.default_tax_account,
+      additional_cess: product.additional_cess ?? 'N/A',
+      category_name: product.category?.category_name ?? 'N/A',
+      sub_category_title: product.sub_category?.sub_category_title ?? 'N/A',
+      store_branch_title: product.store?.branch_title ?? 'N/A',
+      store_address: product.store?.address ?? 'N/A',
+      store_phone: product.store?.phone ?? 'N/A',
+      uom_title: product.uom?.uom_title ?? 'N/A',
+      supplier_names: product.suppliers.length > 0 
+        ? product.suppliers.map(s => s.supplier.supplier_name).join(', ') 
+        : 'N/A',
+      total_invoice_amount: product.invoice_items.reduce((sum, item) => sum + (item.total_amount || 0), 0),
+      total_invoice_quantity: product.invoice_items.reduce((sum, item) => sum + (item.quantity || 0), 0),
+      total_sale_amount: product.sale_items.reduce((sum, item) => sum + (item.total || 0), 0),
+      total_sale_quantity: product.sale_items.reduce((sum, item) => sum + (item.quantity || 0), 0),
+    }));
+    return NextResponse.json(flattenedProducts, { status: 200 });
   } catch (error) {
-    console.error('Get products error:', error.message, error.stack);
+    console.error('Get products error:', error);
     return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
   }
 }
