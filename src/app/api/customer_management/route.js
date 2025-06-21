@@ -9,17 +9,7 @@ export async function GET() {
     }
 
     const customers = await prisma.customer.findMany({
-      orderBy: { name: 'asc' },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        address: true,
-        balance: true,
-        created_at: true,
-        updated_at: true,
-      },
+      orderBy: { name: 'asc' }
     });
 
     return NextResponse.json(customers, { status: 200 });
@@ -32,7 +22,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     const data = await request.json();
-    const { name, email, phone, address, balance } = data;
+    const { name, email, phone, address, balance, vat_no } = data;
 
     if (!name) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 });
@@ -103,6 +93,7 @@ export async function POST(request) {
         email: email ? email.trim() : null,
         phone: phone ? phone.trim() : null,
         address: address ? address.trim() : null,
+        vat_no: vat_no ? vat_no.trim() : null,
         balance: balance !== undefined ? parseFloat(balance) : 0.0,
       },
       select: {
