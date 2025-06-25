@@ -42,7 +42,7 @@ export async function PUT(request, { params }) {
 
     // Check sub-category exists
     const existingSubCategory = await prisma.SubCategory.findUnique({
-      where: { sub_category_id: id },
+      where: { id: id },
     });
     if (!existingSubCategory) {
       return NextResponse.json({ error: 'Sub-category not found' }, { status: 404 });
@@ -51,7 +51,7 @@ export async function PUT(request, { params }) {
     // Check category_id if provided
     if (category_id) {
       const category = await prisma.category.findUnique({
-        where: { category_id },
+        where: { id },
       });
       if (!category) {
         return NextResponse.json({ error: 'Invalid category ID' }, { status: 400 });
@@ -60,7 +60,7 @@ export async function PUT(request, { params }) {
 
     // Update sub-category
     const subCategory = await prisma.SubCategory.update({
-      where: { sub_category_id: id },
+      where: { id: id },
       data: {
         sub_category_title: sub_category_title ? sub_category_title.trim() : undefined,
         category_id: category_id ? category_id : undefined,
@@ -92,7 +92,7 @@ export async function DELETE(request, { params }) {
 
     // Check sub-category exists
     const existingSubCategory = await prisma.SubCategory.findUnique({
-      where: { sub_category_id: id },
+      where: { id: id },
     });
     if (!existingSubCategory) {
       return NextResponse.json({ error: 'Sub-category not found' }, { status: 404 });
@@ -100,7 +100,7 @@ export async function DELETE(request, { params }) {
 
     // Delete sub-category
     await prisma.SubCategory.delete({
-      where: { sub_category_id: id },
+      where: { id: id },
     });
 
     return NextResponse.json({ message: 'Sub-category deleted successfully' }, { status: 200 });
