@@ -29,7 +29,7 @@ export async function PUT(request, { params }) {
     }
 
     const existingCategory = await prisma.category.findUnique({
-      where: { category_id: parseInt(id) },
+      where: { id: parseInt(id) },
     });
 
     if (!existingCategory) {
@@ -37,7 +37,7 @@ export async function PUT(request, { params }) {
     }
 
     const category = await prisma.category.update({
-      where: { category_id: parseInt(id) },
+      where: { id: parseInt(id) },
       data: { category_name },
     });
 
@@ -52,7 +52,7 @@ export async function DELETE(request, { params }) {
   try {
     const { id } = params;
     const existingCategory = await prisma.category.findUnique({
-      where: { category_id: parseInt(id) },
+      where: { id: parseInt(id) },
     });
 
     if (!existingCategory) {
@@ -72,7 +72,7 @@ export async function DELETE(request, { params }) {
     }
 
     await prisma.category.delete({
-      where: { category_id: parseInt(id) },
+      where: { id: parseInt(id) },
     });
 
     return NextResponse.json({ message: 'Category deleted successfully' }, { status: 200 });
