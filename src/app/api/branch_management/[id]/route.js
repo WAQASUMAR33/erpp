@@ -64,17 +64,7 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ error: 'Store not found' }, { status: 404 });
     }
 
-    // Check for related products
-    const relatedstores = await prisma.Store.count({
-      where: { id: parseInt(id) },
-    });
 
-    if (relatedstores > 0) {
-      return NextResponse.json(
-        { error: 'Cannot delete category with associated products' },
-        { status: 400 }
-      );
-    }
 
     await prisma.Store.delete({
       where: { id: parseInt(id) },
