@@ -4,8 +4,8 @@ import { NextResponse } from 'next/server';
 export async function GET() {
   try {
     if (!prisma.Store) {
-      console.error('Prisma category model is undefined');
-      return NextResponse.json({ error: 'Category model not found' }, { status: 500 });
+      console.error('Prisma Store model is undefined');
+      return NextResponse.json({ error: 'Store model not found' }, { status: 500 });
     }
 
     const stores = await prisma.Store.findMany({
@@ -14,45 +14,53 @@ export async function GET() {
 
     return NextResponse.json(stores, { status: 200 });
   } catch (error) {
-    console.error('Get categories error:', error);
-    return NextResponse.json({ error: 'Failed to fetch categories' }, { status: 500 });
+    console.error('Get stores error:', error);
+    return NextResponse.json({ error: 'Failed to fetch stores' }, { status: 500 });
   }
 }
 
 export async function POST(request) {
   try {
     const data = await request.json();
-    const { branch_title,address,phone } = data;
+    const { branch_title, sub_title, address, phone, email, logo_path, website, tax_no } = data;
 
- 
-
-    if (!prisma.Store) {
-      console.error('Prisma category model is undefined');
-      return NextResponse.json({ error: 'Category model not found' }, { status: 500 });
+    // Validate required fields
+    if (!branch_title || typeof branch_title !== 'string') {
+      return NextResponse.json({ error: 'Branch title is required' }, { status: 400 });
     }
 
-    // Check for duplicate category_name
+    if (!prisma.Store) {
+      console.error('Prisma Store model is undefined');
+      return NextResponse.json({ error: 'Store model not found' }, { status: 500 });
+    }
+
+    // Check for duplicate branch_title
     const existingStore = await prisma.Store.findFirst({
       where: { branch_title: branch_title.trim() },
     });
     if (existingStore) {
-      return NextResponse.json({ error: 'Category name already exists' }, { status: 400 });
+      return NextResponse.json({ error: 'Branch title already exists' }, { status: 400 });
     }
 
-    const branch = await prisma.Store.create({
+    const store = await prisma.Store.create({
       data: {
         branch_title: branch_title.trim(),
-        address: address,
-        phone: phone,
+        sub_title: sub_title || '', // Default to empty string as per schema
+        address: address || null,
+        phone: phone || null,
+        email: email || null,
+        logo_path: logo_path || null,
+        website: website || null,
+        tax_no: tax_no || null,
       },
     });
 
     return NextResponse.json(
-      { branch, message: 'Store created successfully' },
+      { store, message: 'Store created successfully' },
       { status: 201 }
     );
   } catch (error) {
-    console.error('Store category error:', error);
-    return NextResponse.json({ error: 'Failed to create Store' }, { status: 500 });
+    console.error('Create store error:', error);
+    return NextResponse.json({ error: 'Failed to create store' }, { status: 500 });
   }
 }

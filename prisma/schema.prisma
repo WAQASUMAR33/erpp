@@ -235,8 +235,13 @@ model InvoiceItem {
 model Store {
   id            Int         @id @default(autoincrement())
   branch_title   String      @db.VarChar(255)
+  sub_title      String     @db.Text @default("")
   address       String?     @db.Text
   phone         String?     @db.VarChar(50)
+  email         String?     @db.VarChar(50)
+  logo_path     String?     @db.Text
+  website       String?     @db.Text
+  tax_no        String?     @db.Text
   created_at    DateTime    @default(now())
   updated_at    DateTime    @updatedAt
   products      Product[]   @relation("StoreProducts")
@@ -266,7 +271,6 @@ model Sale {
   user_id                Int
   customer_id            Int?
   store_id               Int?
-  invoice_no             String?      @default("")
   due_date               DateTime     @default(now())
   total_amount           Float        @default(0.0)
   discount_amount        Float        @default(0.0)
@@ -281,7 +285,6 @@ model Sale {
   store                  Store?       @relation("StoreSales", fields: [store_id], references: [id], map: "fk_sale_store")
   sale_items             SaleItem[]   @relation("SaleItems")
   customer_ledger_entries CustomerLedger[] @relation("SaleCustomerLedger")
-  @@index([sale_number])
 }
 
 model SaleItem {
@@ -291,7 +294,9 @@ model SaleItem {
   tax_setting_id    Int?
   quantity          Float
   unit_price        Float
-  discount          Float?       @default(0.0)
+  dis_per           Float?       @default(0.0)
+  dis_amount        Float?       @default(0.0)
+  tax_per           Float?       @default(0.0)
   tax_amount        Float?       @default(0.0)
   total             Float
   created_at        DateTime     @default(now())
