@@ -18,7 +18,7 @@ export async function GET(request, { params }) {
     });
 
     if (!productss) {
-      return NextResponse.json({ error: 'Expense not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
     return NextResponse.json(productss, { status: 200 });
