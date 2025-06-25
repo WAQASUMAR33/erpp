@@ -22,7 +22,7 @@ export async function GET(request, { params }) {
 export async function PUT(request, { params }) {
   try {
     const { id } = params;
-    const { branch_title, address,phone } = await request.json();
+    const { branch_title, sub_title, address, phone, email, logo_path, website, tax_no} = await request.json();
 
     if (!branch_title) {
       return NextResponse.json({ error: 'Store name is required' }, { status: 400 });
@@ -41,8 +41,12 @@ export async function PUT(request, { params }) {
       data: { 
         branch_title, 
         address,
-        phone
-               
+        phone,
+        sub_title,
+        email,
+        website,
+        logo_path,
+        tax_no         
        },
     });
 
