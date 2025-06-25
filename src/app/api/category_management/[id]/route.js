@@ -60,7 +60,7 @@ export async function DELETE(request, { params }) {
     }
 
     // Check for related products
-    const relatedProducts = await prisma.products.count({
+    const relatedProducts = await prisma.Product.count({
       where: { category_id: parseInt(id) },
     });
 
