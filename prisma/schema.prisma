@@ -277,7 +277,7 @@ model Sale {
   total_tax              Float        @default(0.0)
   net_total              Float        @default(0.0)
   payment_status         String       @db.VarChar(20) @default("Pending")
-  payment_type           Float        @default(0.0)
+  payment_type           String?
   payment                Float        @default(0.0)
   details                String       @db.Text
   created_at             DateTime     @default(now())
