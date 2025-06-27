@@ -48,9 +48,7 @@ export async function POST(request) {
         { status: 400 }
       );
     }
-    if (typeof net_total !== 'string') {
-      return NextResponse.json({ error: 'Valid net_total (string) is required' }, { status: 400 });
-    }
+   
     if (!payment_status || typeof payment_status !== 'string' || payment_status.length > 20) {
       return NextResponse.json(
         { error: 'Valid payment_status (string, max 20 chars) is required' },
@@ -105,6 +103,8 @@ export async function POST(request) {
         dis_per,
         dis_amount,
         net_total: item_net_total,
+        created_at: item_created_at,
+        updated_at: item_updated_at,
       } = item;
 
       if (!product_id || isNaN(parseInt(product_id))) {
@@ -167,6 +167,18 @@ export async function POST(request) {
           { status: 400 }
         );
       }
+      if (item_created_at && isNaN(Date.parse(item_created_at))) {
+       return NextResponse.json(
+          { error: 'Valid created_at (ISO date string) is required for each sale item' },
+          { status: 400 }
+        );
+      }
+      if (item_updated_at && isNaN(Date.parse(item_updated_at))) {
+        return NextResponse.json(
+          { error: 'Valid updated_at (ISO date string) is required for each sale item' },
+          { status: 400 }
+        );
+      }
 
       if (!(await prisma.product.findUnique({ where: { id: parseInt(product_id) } }))) {
         return NextResponse.json({ error: `Invalid product_id: ${product_id}` }, { status: 400 });
@@ -178,24 +190,25 @@ export async function POST(request) {
 
     // Create Sale and SaleItems in a transaction
     const result = await prisma.$transaction(async (tx) => {
+      // Prepare sale data, omitting created_at and updated_at to use Prisma defaults
+      const saleData = {
+        user_id: parseInt(user_id),
+        customer_id: customer_id ? parseInt(customer_id) : null,
+        store_id: store_id ? parseInt(store_id) : null,
+        due_date: due_date ? new Date(due_date) : new Date(),
+        total_amount: parseFloat(total_amount),
+        discount_amount: parseFloat(discount_amount),
+        total_tax: parseFloat(total_tax),
+        net_total,
+        payment_status,
+        payment_type: parseFloat(payment_type),
+        payment: parseFloat(payment),
+        details: details || '',
+      };
+
       // Create Sale
       const sale = await tx.sale.create({
-        data: {
-          user_id: parseInt(user_id),
-          customer_id: customer_id ? parseInt(customer_id) : null,
-          store_id: store_id ? parseInt(store_id) : null,
-          due_date: due_date ? new Date(due_date) : new Date(),
-          total_amount: parseFloat(total_amount),
-          discount_amount: parseFloat(discount_amount),
-          total_tax: parseFloat(total_tax),
-          net_total,
-          payment_status,
-          payment_type: parseFloat(payment_type),
-          payment: parseFloat(payment),
-          details: details || '',
-          created_at: created_at ? new Date(created_at) : new Date(),
-          updated_at: updated_at ? new Date(updated_at) : new Date(),
-        },
+        data: saleData,
         select: {
           id: true,
           net_total: true,
@@ -219,8 +232,8 @@ export async function POST(request) {
               dis_per: item.dis_per ? parseFloat(item.dis_per) : 0,
               dis_amount: item.dis_amount ? parseFloat(item.dis_amount) : 0,
               net_total: parseFloat(item.net_total),
-              created_at: item.created_at ? new Date(item.created_at) : new Date(),
-              updated_at: item.updated_at ? new Date(item.updated_at) : new Date(),
+              created_at: item.created_at && !isNaN(Date.parse(item.created_at)) ? new Date(item.created_at) : new Date(),
+              updated_at: item.updated_at && !isNaN(Date.parse(item.updated_at)) ? new Date(item.created_at) : new Date(),
             },
             select: {
               id: true,
