@@ -48,31 +48,6 @@ export async function POST(request) {
         { status: 400 }
       );
     }
-   
-    if (!payment_status || typeof payment_status !== 'string' || payment_status.length > 20) {
-      return NextResponse.json(
-        { error: 'Valid payment_status (string, max 20 chars) is required' },
-        { status: 400 }
-      );
-    }
-    if (!Number.isFinite(parseFloat(payment_type)) || parseFloat(payment_type) < 0) {
-      return NextResponse.json(
-        { error: 'Valid payment_type (non-negative number) is required' },
-        { status: 400 }
-      );
-    }
-    if (!Number.isFinite(parseFloat(payment)) || parseFloat(payment) < 0) {
-      return NextResponse.json(
-        { error: 'Valid payment (non-negative number) is required' },
-        { status: 400 }
-      );
-    }
-    if (details && typeof details !== 'string') {
-      return NextResponse.json({ error: 'Valid details (string) is required' }, { status: 400 });
-    }
-    if (due_date && isNaN(Date.parse(due_date))) {
-      return NextResponse.json({ error: 'Valid due_date (ISO date string) is required' }, { status: 400 });
-    }
 
     // Validate sale_items (order_items in input)
     if (!Array.isArray(order_items) || order_items.length === 0) {
