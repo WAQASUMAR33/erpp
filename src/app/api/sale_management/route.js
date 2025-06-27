@@ -1,0 +1,253 @@
+import prisma from '../../lib/prisma';
+import { NextResponse } from 'next/server';
+
+export async function POST(request) {
+  try {
+    const data = await request.json();
+    const {
+      store_id,
+      customer_id,
+      user_id,
+      due_date,
+      total_amount,
+      discount_amount,
+      total_tax,
+      net_total,
+      payment_status,
+      payment_type,
+      payment,
+      details,
+      order_items, // Maps to sale_items in Prisma
+    } = data;
+
+    // Validate required fields
+    if (!user_id || isNaN(parseInt(user_id))) {
+      return NextResponse.json({ error: 'Valid user_id (integer) is required' }, { status: 400 });
+    }
+    if (store_id && isNaN(parseInt(store_id))) {
+      return NextResponse.json({ error: 'Valid store_id (integer) is required' }, { status: 400 });
+    }
+    if (customer_id && isNaN(parseInt(customer_id))) {
+      return NextResponse.json({ error: 'Valid customer_id (integer) is required' }, { status: 400 });
+    }
+    if (!Number.isFinite(parseFloat(total_amount)) || parseFloat(total_amount) < 0) {
+      return NextResponse.json(
+        { error: 'Valid total_amount (non-negative number) is required' },
+        { status: 400 }
+      );
+    }
+    if (!Number.isFinite(parseFloat(discount_amount)) || parseFloat(discount_amount) < 0) {
+      return NextResponse.json(
+        { error: 'Valid discount_amount (non-negative number) is required' },
+        { status: 400 }
+      );
+    }
+    if (!Number.isFinite(parseFloat(total_tax)) || parseFloat(total_tax) < 0) {
+      return NextResponse.json(
+        { error: 'Valid total_tax (non-negative number) is required' },
+        { status: 400 }
+      );
+    }
+    if (typeof net_total !== 'string') {
+      return NextResponse.json({ error: 'Valid net_total (string) is required' }, { status: 400 });
+    }
+    if (!payment_status || typeof payment_status !== 'string' || payment_status.length > 20) {
+      return NextResponse.json(
+        { error: 'Valid payment_status (string, max 20 chars) is required' },
+        { status: 400 }
+      );
+    }
+    if (!Number.isFinite(parseFloat(payment_type)) || parseFloat(payment_type) < 0) {
+      return NextResponse.json(
+        { error: 'Valid payment_type (non-negative number) is required' },
+        { status: 400 }
+      );
+    }
+    if (!Number.isFinite(parseFloat(payment)) || parseFloat(payment) < 0) {
+      return NextResponse.json(
+        { error: 'Valid payment (non-negative number) is required' },
+        { status: 400 }
+      );
+    }
+    if (details && typeof details !== 'string') {
+      return NextResponse.json({ error: 'Valid details (string) is required' }, { status: 400 });
+    }
+    if (due_date && isNaN(Date.parse(due_date))) {
+      return NextResponse.json({ error: 'Valid due_date (ISO date string) is required' }, { status: 400 });
+    }
+
+    // Validate sale_items (order_items in input)
+    if (!Array.isArray(order_items) || order_items.length === 0) {
+      return NextResponse.json({ error: 'At least one sale item is required' }, { status: 400 });
+    }
+
+    // Validate foreign keys
+    if (!(await prisma.user.findUnique({ where: { id: parseInt(user_id) } }))) {
+      return NextResponse.json({ error: 'Invalid user_id' }, { status: 400 });
+    }
+    if (store_id && !(await prisma.store.findUnique({ where: { id: parseInt(store_id) } }))) {
+      return NextResponse.json({ error: 'Invalid store_id' }, { status: 400 });
+    }
+    if (customer_id && !(await prisma.customer.findUnique({ where: { id: parseInt(customer_id) } }))) {
+      return NextResponse.json({ error: 'Invalid customer_id' }, { status: 400 });
+    }
+
+    // Validate sale_items fields and foreign keys
+    for (const item of order_items) {
+      const {
+        product_id,
+        unit_price,
+        quantity,
+        total,
+        tax_setting_id,
+        tax_per,
+        tax_amount,
+        dis_per,
+        dis_amount,
+        net_total: item_net_total,
+      } = item;
+
+      if (!product_id || isNaN(parseInt(product_id))) {
+        return NextResponse.json(
+          { error: 'Valid product_id (integer) is required for each sale item' },
+          { status: 400 }
+        );
+      }
+      if (!Number.isFinite(parseFloat(unit_price)) || parseFloat(unit_price) < 0) {
+        return NextResponse.json(
+          { error: 'Valid unit_price (non-negative number) is required for each sale item' },
+          { status: 400 }
+        );
+      }
+      if (!Number.isFinite(parseFloat(quantity)) || parseFloat(quantity) <= 0) {
+        return NextResponse.json(
+          { error: 'Valid quantity (positive number) is required for each sale item' },
+          { status: 400 }
+        );
+      }
+      if (!Number.isFinite(parseFloat(total)) || parseFloat(total) < 0) {
+        return NextResponse.json(
+          { error: 'Valid total (non-negative number) is required for each sale item' },
+          { status: 400 }
+        );
+      }
+      if (tax_setting_id && isNaN(parseInt(tax_setting_id))) {
+        return NextResponse.json(
+          { error: 'Valid tax_setting_id (integer) is required for each sale item' },
+          { status: 400 }
+        );
+      }
+      if (tax_per && (!Number.isFinite(parseFloat(tax_per)) || parseFloat(tax_per) < 0)) {
+        return NextResponse.json(
+          { error: 'Valid tax_per (non-negative number) is required for each sale item' },
+          { status: 400 }
+        );
+      }
+      if (tax_amount && (!Number.isFinite(parseFloat(tax_amount)) || parseFloat(tax_amount) < 0)) {
+        return NextResponse.json(
+          { error: 'Valid tax_amount (non-negative number) is required for each sale item' },
+          { status: 400 }
+        );
+      }
+      if (dis_per && (!Number.isFinite(parseFloat(dis_per)) || parseFloat(dis_per) < 0)) {
+        return NextResponse.json(
+          { error: 'Valid dis_per (non-negative number) is required for each sale item' },
+          { status: 400 }
+        );
+      }
+      if (dis_amount && (!Number.isFinite(parseFloat(dis_amount)) || parseFloat(dis_amount) < 0)) {
+        return NextResponse.json(
+          { error: 'Valid dis_amount (non-negative number) is required for each sale item' },
+          { status: 400 }
+        );
+      }
+      if (!Number.isFinite(parseFloat(item_net_total)) || parseFloat(item_net_total) < 0) {
+        return NextResponse.json(
+          { error: 'Valid net_total (non-negative number) is required for each sale item' },
+          { status: 400 }
+        );
+      }
+
+      if (!(await prisma.product.findUnique({ where: { id: parseInt(product_id) } }))) {
+        return NextResponse.json({ error: `Invalid product_id: ${product_id}` }, { status: 400 });
+      }
+      if (tax_setting_id && !(await prisma.taxSetting.findUnique({ where: { id: parseInt(tax_setting_id) } }))) {
+        return NextResponse.json({ error: `Invalid tax_setting_id: ${tax_setting_id}` }, { status: 400 });
+      }
+    }
+
+    // Create Sale and SaleItems in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Create Sale
+      const sale = await tx.sale.create({
+        data: {
+          user_id: parseInt(user_id),
+          customer_id: customer_id ? parseInt(customer_id) : null,
+          store_id: store_id ? parseInt(store_id) : null,
+          due_date: due_date ? new Date(due_date) : new Date(),
+          total_amount: parseFloat(total_amount),
+          discount_amount: parseFloat(discount_amount),
+          total_tax: parseFloat(total_tax),
+          net_total,
+          payment_status,
+          payment_type: parseFloat(payment_type),
+          payment: parseFloat(payment),
+          details: details || '',
+          created_at: created_at ? new Date(created_at) : new Date(),
+          updated_at: updated_at ? new Date(updated_at) : new Date(),
+        },
+        select: {
+          id: true,
+          net_total: true,
+          created_at: true,
+        },
+      });
+
+      // Create SaleItems
+      const createdItems = await Promise.all(
+        order_items.map((item) =>
+          tx.saleItem.create({
+            data: {
+              sale_id: sale.id,
+              product_id: parseInt(item.product_id),
+              unit_price: parseFloat(item.unit_price),
+              quantity: parseFloat(item.quantity),
+              total: parseFloat(item.total),
+              tax_setting_id: item.tax_setting_id ? parseInt(item.tax_setting_id) : null,
+              tax_per: item.tax_per ? parseFloat(item.tax_per) : 0,
+              tax_amount: item.tax_amount ? parseFloat(item.tax_amount) : 0,
+              dis_per: item.dis_per ? parseFloat(item.dis_per) : 0,
+              dis_amount: item.dis_amount ? parseFloat(item.dis_amount) : 0,
+              net_total: parseFloat(item.net_total),
+              created_at: item.created_at ? new Date(item.created_at) : new Date(),
+              updated_at: item.updated_at ? new Date(item.updated_at) : new Date(),
+            },
+            select: {
+              id: true,
+              product_id: true,
+              total: true,
+              created_at: true,
+            },
+          })
+        )
+      );
+
+      return { sale, sale_items: createdItems };
+    });
+
+    return NextResponse.json(
+      {
+        sale: result.sale,
+        sale_items: result.sale_items,
+        message: 'Sale and items created successfully',
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error('Create sale error:', error.message, error.stack);
+    return NextResponse.json(
+      { error: 'Failed to create sale', details: error.message },
+      { status: 500 }
+    );
+  }
+}

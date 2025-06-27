@@ -274,10 +274,12 @@ model Sale {
   due_date               DateTime     @default(now())
   total_amount           Float        @default(0.0)
   discount_amount        Float        @default(0.0)
-  total_tax              Float        @default(50.0)
-  net_total              String
+  total_tax              Float        @default(0.0)
+  net_total              Float        @default(0.0)
   payment_status         String       @db.VarChar(20) @default("Pending")
-  sale_date              DateTime     @default(now())
+  payment_type           Float        @default(0.0)
+  payment                Float        @default(0.0)
+  details                String       @db.Text
   created_at             DateTime     @default(now())
   updated_at             DateTime     @updatedAt
   user                   User         @relation("UserSales", fields: [user_id], references: [id], map: "fk_sale_user")
@@ -294,11 +296,12 @@ model SaleItem {
   tax_setting_id    Int?
   quantity          Float
   unit_price        Float
+  total             Float        @default(0.0)
   dis_per           Float?       @default(0.0)
   dis_amount        Float?       @default(0.0)
   tax_per           Float?       @default(0.0)
   tax_amount        Float?       @default(0.0)
-  total             Float
+  net_total         Float        @default(0.0)
   created_at        DateTime     @default(now())
   updated_at        DateTime     @updatedAt
   sale              Sale         @relation("SaleItems", fields: [sale_id], references: [id], onDelete: Cascade, map: "fk_saleitem_sale")
