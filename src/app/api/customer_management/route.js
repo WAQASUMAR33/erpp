@@ -102,6 +102,7 @@ export async function POST(request) {
         email: true,
         phone: true,
         address: true,
+        vat_no: true,
         balance: true,
         created_at: true,
         updated_at: true,

@@ -22,6 +22,24 @@ export async function GET() {
             updated_at: true,
           },
         },
+        supplier: {
+          select: {
+            id: true,
+            supplier_name: true,
+            contact_name: true,
+            email: true,
+            phone: true,
+            address: true,
+            bank_name: true,
+            bank_accountno: true,
+            balance: true,
+            tax_id: true,
+            payment_terms: true,
+            status: true,
+            created_at: true,
+            updated_at: true,
+          },
+        },
       },
       orderBy: { created_at: 'desc' },
     });
@@ -34,6 +52,8 @@ export async function GET() {
     );
   }
 }
+
+
 
 export async function POST(request) {
   try {

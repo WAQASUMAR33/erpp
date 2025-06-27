@@ -151,7 +151,7 @@ export async function PUT(request, { params }) {
     );
   } catch (error) {
     console.error('Update supplier error:', error.message, error.stack);
-    return NextResponse.json({ error: 'Failed to update supplier' }, { status: 500 });
+    return NextResponse.json({ message: 'Failed to update supplier' }, { status: 500 });
   }
 }
 
