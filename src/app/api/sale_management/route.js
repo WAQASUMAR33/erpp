@@ -6,7 +6,7 @@ export async function POST(request) {
     const data = await request.json();
     const {
       store_id,
-      customer_id,
+      supplier_id,
       user_id,
       due_date,
       total_amount,
@@ -27,9 +27,7 @@ export async function POST(request) {
     if (store_id && isNaN(parseInt(store_id))) {
       return NextResponse.json({ error: 'Valid store_id (integer) is required' }, { status: 400 });
     }
-    if (customer_id && isNaN(parseInt(customer_id))) {
-      return NextResponse.json({ error: 'Valid customer_id (integer) is required' }, { status: 400 });
-    }
+  
     if (!Number.isFinite(parseFloat(total_amount)) || parseFloat(total_amount) < 0) {
       return NextResponse.json(
         { error: 'Valid total_amount (non-negative number) is required' },
@@ -61,8 +59,8 @@ export async function POST(request) {
     if (store_id && !(await prisma.store.findUnique({ where: { id: parseInt(store_id) } }))) {
       return NextResponse.json({ error: 'Invalid store_id' }, { status: 400 });
     }
-    if (customer_id && !(await prisma.customer.findUnique({ where: { id: parseInt(customer_id) } }))) {
-      return NextResponse.json({ error: 'Invalid customer_id' }, { status: 400 });
+    if (supplier_id && !(await prisma.supplier.findUnique({ where: { id: parseInt(supplier_id) } }))) {
+      return NextResponse.json({ error: 'Invalid supplier_id' }, { status: 400 });
     }
 
     // Validate sale_items fields and foreign keys
@@ -168,7 +166,7 @@ export async function POST(request) {
       // Prepare sale data, omitting created_at and updated_at to use Prisma defaults
       const saleData = {
         user_id: parseInt(user_id),
-        customer_id: customer_id ? parseInt(customer_id) : null,
+        supplier_id: supplier_id ? parseInt(supplier_id) : null,
         store_id: store_id ? parseInt(store_id) : null,
         due_date: due_date ? new Date(due_date) : new Date(),
         total_amount: parseFloat(total_amount),
