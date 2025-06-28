@@ -293,7 +293,7 @@ export async function GET() {
       })),
     }));
 
-    return NextResponse.json({ sales: flattenedSales }, { status: 200 });
+    return NextResponse.json(flattenedSales , { status: 200 });
   } catch (error) {
     console.error('Get sales error:', error.message);
     return NextResponse.json(
