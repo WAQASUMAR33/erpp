@@ -195,7 +195,6 @@ model Invoice {
   user                   User?            @relation("UserInvoices", fields: [user_id], references: [id], onDelete: SetNull, map: "fk_invoice_user")
   invoice_items          InvoiceItem[]    @relation("InvoiceItems")
   supplier_ledger_entries SupplierLedger[] @relation("InvoiceSupplierLedger")
-  customer_ledger_entries CustomerLedger[] @relation("InvoiceCustomerLedger")
   @@index([invoice_id])
 }
 
@@ -274,7 +273,6 @@ model Sale {
   supplier               Supplier?    @relation("SupplierSales", fields: [supplier_id], references: [id], map: "fk_sale_supplier")
   store                  Store?       @relation("StoreSales", fields: [store_id], references: [id], map: "fk_sale_store")
   sale_items             SaleItem[]   @relation("SaleItems")
-  customer_ledger_entries CustomerLedger[] @relation("SaleCustomerLedger")
 }
 
 model SaleItem {
