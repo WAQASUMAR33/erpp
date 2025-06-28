@@ -267,9 +267,7 @@ export async function GET() {
             },
           },
         },
-        supplier: {
-          select: { id: true, supplier_name: true },
-        },
+        supplier: {  },
       },
     });
 
