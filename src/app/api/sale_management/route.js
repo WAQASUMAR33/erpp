@@ -237,3 +237,70 @@ export async function POST(request) {
     );
   }
 }
+
+
+
+
+export async function GET() {
+  try {
+    // Fetch all sales
+    const sales = await prisma.sale.findMany({
+      include: {
+        sale_items: {
+          select: {
+            id: true,
+            sale_id: true,
+            product_id: true,
+            tax_setting_id: true,
+            quantity: true,
+            unit_price: true,
+            total: true,
+            dis_per: true,
+            dis_amount: true,
+            tax_per: true,
+            tax_amount: true,
+            net_total: true,
+            created_at: true,
+            updated_at: true,
+            product: {
+              select: { item_name: true },
+            },
+          },
+        },
+        supplier: {
+          select: { id: true, supplier_name: true },
+        },
+      },
+    });
+
+    // Flatten sale_items to include item_name in the same row
+    const flattenedSales = sales.map(sale => ({
+      ...sale,
+      sale_items: sale.sale_items.map(item => ({
+        id: item.id,
+        sale_id: item.sale_id,
+        product_id: item.product_id,
+        tax_setting_id: item.tax_setting_id,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        total: item.total,
+        dis_per: item.dis_per,
+        dis_amount: item.dis_amount,
+        tax_per: item.tax_per,
+        tax_amount: item.tax_amount,
+        net_total: item.net_total,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+        item_name: item.product.item_name,
+      })),
+    }));
+
+    return NextResponse.json({ sales: flattenedSales }, { status: 200 });
+  } catch (error) {
+    console.error('Get sales error:', error.message);
+    return NextResponse.json(
+      { error: 'Failed to fetch sales', details: error.message },
+      { status: 500 }
+    );
+  }
+}

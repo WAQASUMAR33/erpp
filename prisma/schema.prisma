@@ -253,23 +253,6 @@ model UnitOfMeasurement {
   products      Product[] @relation("ProductUOM")
 }
 
-model CustomerLedger {
-  id                Int          @id @default(autoincrement())
-  ledger_number     String       @unique @db.VarChar(50)
-  customer_id       Int
-  transaction_type  String       @db.VarChar(50)
-  amount            Float
-  balance           Float
-  transaction_date  DateTime     @default(now())
-  invoice_id        Int?
-  sale_id           Int?
-  description       String?      @db.Text
-  created_at        DateTime     @default(now())
-  updated_at        DateTime     @updatedAt
-  invoice           Invoice?     @relation("InvoiceCustomerLedger", fields: [invoice_id], references: [id], onDelete: NoAction, map: "fk_customerledger_invoice")
-  sale              Sale?        @relation("SaleCustomerLedger", fields: [sale_id], references: [id], onDelete: NoAction, map: "fk_customerledger_sale")
-  @@index([ledger_number])
-}
 
 model Sale {
   id                     Int          @id @default(autoincrement())
