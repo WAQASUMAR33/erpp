@@ -143,6 +143,7 @@ model Product {
 
 model Supplier {
   id                 Int                @id @default(autoincrement())
+  account_type       String?            @db.VarChar(255) @default("")
   supplier_name      String             @db.VarChar(255)
   contact_name       String?            @db.VarChar(255)
   email              String?            @unique @db.VarChar(255)
