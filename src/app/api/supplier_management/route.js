@@ -45,6 +45,7 @@ export async function POST(request) {
     const data = await request.json();
     const {
       supplier_name,
+      account_type,
       contact_name,
       email,
       phone,
@@ -119,6 +120,7 @@ export async function POST(request) {
     const supplier = await prisma.supplier.create({
       data: {
         supplier_name: supplier_name.trim(),
+        account_type: account_type.trim(),
         contact_name: contact_name ? contact_name.trim() : null,
         email: email ? email.trim() : null,
         phone: phone ? phone.trim() : null,
