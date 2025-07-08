@@ -17,7 +17,7 @@ export async function GET(request) {
         return NextResponse.json({ error: 'Invalid role ID' }, { status: 400 });
       }
 
-      const role = await prisma.role.findUnique({
+      const role = await prisma.Role.findUnique({
         where: { id: roleId },
         include: {
           user_roles: { select: { user_id: true } },
@@ -32,8 +32,8 @@ export async function GET(request) {
       return NextResponse.json(role, { status: 200 });
     }
 
-    const roles = await prisma.role.findMany({
-      orderBy: { role_name: 'asc' },
+    const roles = await prisma.Role.findMany({
+      orderBy: { roleName: 'asc' },
       include: {
         user_roles: { select: { user_id: true } },
         role_permissions: { include: { permission: { select: { permission_name: true } } } },
@@ -50,37 +50,37 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const data = await request.json();
-    const { role_name, description } = data;
+    const { roleName, description } = data;
 
     // Validate required fields
-    if (!role_name || typeof role_name !== 'string' || role_name.trim().length === 0) {
+    if (!roleName || typeof roleName !== 'string' || roleName.trim().length === 0) {
       return NextResponse.json({ error: 'Role name is required and must be a non-empty string' }, { status: 400 });
     }
-    if (role_name.trim().length > 50) {
+    if (roleName.trim().length > 50) {
       return NextResponse.json({ error: 'Role name exceeds 50 characters' }, { status: 400 });
     }
     if (description && typeof description !== 'string') {
       return NextResponse.json({ error: 'Description must be a string' }, { status: 400 });
     }
 
-    // Check for duplicate role_name
-    const existingRole = await prisma.role.findUnique({
-      where: { role_name: role_name.trim() },
+    // Check for duplicate roleName
+    const existingRole = await prisma.Role.findUnique({
+      where: { roleName: roleName.trim() },
     });
     if (existingRole) {
       return NextResponse.json({ error: 'Role name already exists' }, { status: 409 });
     }
 
     // Create role
-    const role = await prisma.role.create({
+    const role = await prisma.Role.create({
       data: {
-        role_name: role_name.trim(),
+        roleName: roleName.trim(),
         description: description || null,
       },
-      include: {
-        user_roles: { select: { user_id: true } },
-        role_permissions: { include: { permission: { select: { permission_name: true } } } },
-      },
+      // include: {
+      //   UserRole: { select: { userId: true } },
+      //   RolePermission: { include: { Permission: { select: { permissionName: true } } } },
+      // },
     });
 
     return NextResponse.json(

@@ -59,26 +59,7 @@ export async function POST(request) {
         password: true,
         role: true,
         status: true,
-        store_id: true,
-        route: true,
-        terminal: true,
-        p_sales: true,
-        p_accounts: true,
-        p_view_sales: true,
-        p_purchases: true,
-        p_view_purchases: true,
-        p_sale_return: true,
-        p_view_products: true,
-        p_products_management: true,
-        p_dayend: true,
-        p_view_expences: true,
-        p_customer_management: true,
-        p_discounts: true,
-        p_employee_management: true,
-        p_printing: true,
-        p_view_customers: true,
-        p_users_management: true,
-        p_supplier_management: true,
+        store_id: true
       },
     });
 
@@ -99,12 +80,12 @@ export async function POST(request) {
     }
 
     // Check if user is active
-    if (user.status !== 'active') {
-      return NextResponse.json(
-        { error: 'User account is not active' },
-        { status: 403 }
-      );
-    }
+    // if (user.status !== 'active') {
+    //   return NextResponse.json(
+    //     { error: 'User account is not active' },
+    //     { status: 403 }
+    //   );
+    // }
 
     // Generate JWT
     const token = jwt.sign(
@@ -125,28 +106,26 @@ export async function POST(request) {
       fullname: user.fullname,
       role: user.role,
       status: user.status,
-      store_id: user.store_id,
-      route: user.route,
-      terminal: user.terminal,
-      permissions: {
-        p_sales: user.p_sales,
-        p_accounts: user.p_accounts,
-        p_view_sales: user.p_view_sales,
-        p_purchases: user.p_purchases,
-        p_view_purchases: user.p_view_purchases,
-        p_sale_return: user.p_sale_return,
-        p_view_products: user.p_view_products,
-        p_products_management: user.p_products_management,
-        p_dayend: user.p_dayend,
-        p_view_expences: user.p_view_expences,
-        p_customer_management: user.p_customer_management,
-        p_discounts: user.p_discounts,
-        p_employee_management: user.p_employee_management,
-        p_printing: user.p_printing,
-        p_view_customers: user.p_view_customers,
-        p_users_management: user.p_users_management,
-        p_supplier_management: user.p_supplier_management,
-      },
+      store_id: user.store_id
+      // permissions: {
+      //   p_sales: user.p_sales,
+      //   p_accounts: user.p_accounts,
+      //   p_view_sales: user.p_view_sales,
+      //   p_purchases: user.p_purchases,
+      //   p_view_purchases: user.p_view_purchases,
+      //   p_sale_return: user.p_sale_return,
+      //   p_view_products: user.p_view_products,
+      //   p_products_management: user.p_products_management,
+      //   p_dayend: user.p_dayend,
+      //   p_view_expences: user.p_view_expences,
+      //   p_customer_management: user.p_customer_management,
+      //   p_discounts: user.p_discounts,
+      //   p_employee_management: user.p_employee_management,
+      //   p_printing: user.p_printing,
+      //   p_view_customers: user.p_view_customers,
+      //   p_users_management: user.p_users_management,
+      //   p_supplier_management: user.p_supplier_management,
+      // },
     };
 
     return NextResponse.json(
