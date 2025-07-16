@@ -199,6 +199,7 @@ export async function POST(request) {
       },
     });
 
+    console.log(product);
     return NextResponse.json(
       { message: 'Product created successfully' },
       { status: 201 }
