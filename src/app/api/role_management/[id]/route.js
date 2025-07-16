@@ -20,7 +20,7 @@ export async function GET(request, { params }) {
 
     return NextResponse.json(role, { status: 200 });
   } catch (error) {
-    if (error instanceof z.ZodError) {
+    if (error) {
       return NextResponse.json({ error: error.errors }, { status: 400 });
     }
     console.error('Get role error:', error);
@@ -68,7 +68,7 @@ export async function PUT(request, { params }) {
       { status: 200 }
     );
   } catch (error) {
-    if (error instanceof z.ZodError) {
+    if (error) {
       return NextResponse.json({ error: error.errors }, { status: 400 });
     }
     console.error('Update role error:', error);
@@ -94,7 +94,7 @@ export async function DELETE(request, { params }) {
 
     return NextResponse.json({ message: 'Role deleted successfully' }, { status: 200 });
   } catch (error) {
-    if (error instanceof z.ZodError) {
+    if (error) {
       return NextResponse.json({ error: error.errors }, { status: 400 });
     }
     console.error('Delete role error:', error);

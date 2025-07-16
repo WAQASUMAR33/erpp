@@ -3,12 +3,12 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    if (!prisma.taxSetting) {
+    if (!prisma.TaxSetting) {
       console.error('Prisma TaxSetting model is undefined');
       return NextResponse.json({ error: 'TaxSetting model not found' }, { status: 500 });
     }
 
-    const taxes = await prisma.taxSetting.findMany({
+    const taxes = await prisma.TaxSetting.findMany({
       orderBy: { tax_name: 'asc' },
       select: {
         id: true,
@@ -55,20 +55,20 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Tax percentage cannot be negative' }, { status: 400 });
     }
 
-    if (!prisma.taxSetting) {
+    if (!prisma.TaxSetting) {
       console.error('Prisma TaxSetting model is undefined');
       return NextResponse.json({ error: 'TaxSetting model not found' }, { status: 500 });
     }
 
     // Check for duplicate tax_name
-    const existingTax = await prisma.taxSetting.findFirst({
+    const existingTax = await prisma.TaxSetting.findFirst({
       where: { tax_name: tax_name.trim() },
     });
     if (existingTax) {
       return NextResponse.json({ error: 'Tax name already exists' }, { status: 400 });
     }
 
-    const tax = await prisma.taxSetting.create({
+    const tax = await prisma.TaxSetting.create({
       data: {
         tax_name: tax_name.trim(),
         tax_per: parseFloat(tax_per),

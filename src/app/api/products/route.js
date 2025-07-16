@@ -200,7 +200,7 @@ export async function POST(request) {
     });
 
     return NextResponse.json(
-      { product, message: 'Product created successfully' },
+      { message: 'Product created successfully' },
       { status: 201 }
     );
   } catch (error) {

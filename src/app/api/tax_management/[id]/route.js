@@ -74,15 +74,7 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: 'Tax not found' }, { status: 404 });
     }
 
-    // Check for duplicate tax_name (excluding current tax)
-    if (tax_name && tax_name.trim() !== tax.tax_name) {
-      const existingTax = await prisma.taxSetting.findFirst({
-        where: { tax_name: tax_name.trim() },
-      });
-      if (existingTax) {
-        return NextResponse.json({ error: 'Tax name already exists' }, { status: 400 });
-      }
-    }
+  
 
     const updatedTax = await prisma.taxSetting.update({
       where: { id: parseInt(id) },
